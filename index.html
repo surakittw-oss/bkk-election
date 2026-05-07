@@ -924,6 +924,8 @@ function mockData(){
       const row=districtData.find(r=>r.district===name);
       if(!row||!row.counted)return{name,winner:null,counted:false};
       const dv=sorted.map((c,ci)=>({...c,votes:row['votes_'+(ci+1)]||0}));
+      const hasVotes=dv.some(c=>c.votes>0);
+      if(!hasVotes) return{name,winner:null,counted:true,distVotes:dv};
       const best=dv.reduce((a,b)=>b.votes>a.votes?b:a,dv[0]);
       return{name,winner:best,counted:true,distVotes:dv};
     });
@@ -963,7 +965,7 @@ function renderDash(d){
   f('foot-time').textContent='อัปเดต: '+ts;
   // winner
   const w=d.cands[0];
-  if(w){
+  if(w && w.name){
     const aw=f('w-avatar-wrap');
     const wIdx=d.cands.indexOf(w);
     if(w.avatar){
@@ -1026,17 +1028,21 @@ function renderDistricts(dw,cs){
   const counted=dw.filter(d=>d.counted).length;
   document.getElementById('dist-counted-label').textContent=`${counted}/${dw.length}`;
   document.getElementById('dist-grid').innerHTML=dw.map((d,i)=>{
-    const ok=d.counted&&d.winner;
-    const color=ok?d.winner.color:'#bdc1c6';
-    const bw=ok&&cs[0].votes?Math.min(d.winner.votes/cs[0].votes*100,100):0;
-    const active=selectedDistrict===i;
-    const av=ok&&d.winner.avatar
-      ?`<img src="${d.winner.avatar}" class="dp-av" onerror="this.outerHTML=svgAv('${d.winner.name}','${d.winner.color}',10)">`
-      :svgAv(d.winner.name, d.winner.color, 10);
+    const ok = d.counted && d.winner && d.winner.name;
+    const color = ok ? d.winner.color : '#bdc1c6';
+    const bw = ok && cs[0] && cs[0].votes ? Math.min(d.winner.votes/cs[0].votes*100,100) : 0;
+    const active = selectedDistrict===i;
+    const winnerName = ok ? d.winner.name.split(' ')[0] : '';
+    const winnerColor = ok ? d.winner.color : '#bdc1c6';
+    const av = ok
+      ? (d.winner.avatar
+          ? `<img src="${d.winner.avatar}" class="dp-av" onerror="this.remove()">`
+          : svgAv(d.winner.name, d.winner.color, 10))
+      : '';
     return `<div class="dp${ok?'':' unc'}${active?' active':''}" style="${active?'border-color:'+color+';background:'+color+'15':''}" onclick="selectDistrict(${i})">
       <div class="dp-bar" style="width:${bw.toFixed(0)}%;background:${color}"></div>
       <div class="dp-nm" style="${ok?'color:var(--n700)':''}">${d.name}</div>
-      ${ok?`<div class="dp-w" style="color:${color}">${av}${d.winner.name.split(' ')[0]}</div>`:'<div style="font-size:8px;color:var(--n400)">รอนับ</div>'}
+      ${ok ? `<div class="dp-w" style="color:${winnerColor}">${av}${winnerName}</div>` : '<div style="font-size:8px;color:var(--n400)">รอนับ</div>'}
     </div>`;
   }).join('');
   if(selectedDistrict!==null)showDistrictDetail(dw,cs,selectedDistrict);
@@ -1049,7 +1055,7 @@ function renderDistricts(dw,cs){
 function selectDistrict(i){selectedDistrict=i;if(currentData)renderDistricts(currentData.distWin,currentData.cands);}
 function showDistrictDetail(dw,cs,i){
   const d=dw[i];const el=document.getElementById('dist-detail');
-  if(!d||!d.counted){el.innerHTML=`<div class="dd-box"><div class="dd-title">${d?'เขต'+d.name:''}</div><div style="font-size:12px;color:var(--n500)">${d?'ยังไม่นับคะแนน':'—'}</div></div>`;return;}
+  if(!d||!d.counted||!d.winner){el.innerHTML=`<div class="dd-box"><div class="dd-title">${d?'เขต'+d.name:''}</div><div style="font-size:12px;color:var(--n500)">${d?'ยังไม่มีข้อมูลคะแนน':'—'}</div></div>`;return;}
   // Use real district votes if available, else simulate
   let dc;
   if(d.distVotes && d.distVotes.length > 0){
