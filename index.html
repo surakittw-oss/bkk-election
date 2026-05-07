@@ -148,7 +148,7 @@ button,select,input,textarea{font-family:inherit}
 .winner-card::after{content:'';position:absolute;right:10px;bottom:-20px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.04)}
 .winner-card .card-hd{color:rgba(255,255,255,.6)}
 .wc-body{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px}
-.wc-av{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.wc-av{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25)}
 .wc-name{font-size:16px;font-weight:700;line-height:1.25}
 .wc-party{font-size:11px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:4px;margin-top:2px}
 .wc-party img{width:14px;height:14px;border-radius:3px;object-fit:cover}
@@ -166,9 +166,9 @@ button,select,input,textarea{font-family:inherit}
 .cr-accent{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
 .cr-n{font-size:12px;font-weight:700;color:var(--n400);text-align:center;width:18px;flex-shrink:0}
 .cr-n.r1{color:var(--g500)}
-.cr-av{width:44px;height:44px;border-radius:50%;border:2px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden;box-shadow:var(--sh1)}
+.cr-av{width:52px;height:52px;border-radius:50%;border:2px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden;box-shadow:var(--sh1)}
 .cr-av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
-.cr-av.r1{width:52px;height:52px;border-color:var(--g300);box-shadow:0 0 0 3px var(--g100),var(--sh1)}
+.cr-av.r1{width:64px;height:64px;border-color:var(--g300);box-shadow:0 0 0 3px var(--g100),var(--sh1)}
 .cr-info{flex:1;min-width:0}
 .cr-name{font-size:13px;font-weight:600;color:var(--n800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .cr-name.r1{font-size:14px;color:var(--g600)}
@@ -432,7 +432,7 @@ button,select,input,textarea{font-family:inherit}
 .skg-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--n100);position:relative}
 .skg-row:last-child{border-bottom:none}
 .skg-rank{font-size:11px;font-weight:600;color:var(--n400);text-align:right;width:18px;flex-shrink:0}
-.skg-av{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden}
+.skg-av{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden}
 .skg-info{flex:1;min-width:0}
 .skg-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .skg-party{font-size:10px;color:var(--n500);margin-top:1px}
@@ -442,6 +442,15 @@ button,select,input,textarea{font-family:inherit}
 .skg-votes{font-size:12px;font-weight:600}
 .skg-elected{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--g50);color:var(--g600);border:1px solid var(--g200);margin-top:2px;display:inline-block}
 .skg-no-data{font-size:12px;color:var(--n400);padding:10px 0;text-align:center}
+/* SKG district mini card */
+.skg-dist-mini{background:var(--n50);border:1px solid var(--n200);border-radius:var(--r-sm);padding:10px;cursor:pointer;transition:all .15s}
+.skg-dist-mini:hover{border-color:var(--n400);box-shadow:var(--sh1)}
+.skg-dist-mini-hd{font-size:11px;font-weight:600;color:var(--n700);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.skg-dist-mini-tag{font-size:9px;padding:1px 5px;border-radius:7px}
+.skg-mini-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.skg-mini-av{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden}
+.skg-mini-name{font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skg-mini-votes{font-size:10px;color:var(--n500);flex-shrink:0}
 
 /* ── ANIMATIONS ─────────────────────────── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -455,7 +464,7 @@ button,select,input,textarea{font-family:inherit}
 .cand-detail-modal .modal-box{max-width:520px}
 .cd-hero{background:var(--n50);border-radius:var(--r);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
 .cd-hero-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
-.cd-av{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--n0);box-shadow:0 2px 8px rgba(0,0,0,.12);flex-shrink:0;background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:32px}
+.cd-av{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--n0);box-shadow:0 2px 8px rgba(0,0,0,.12);flex-shrink:0;background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;overflow:hidden}
 .cd-av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
 .cd-hero-info{flex:1;min-width:0}
 .cd-rank{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-bottom:6px}
@@ -650,6 +659,14 @@ button,select,input,textarea{font-family:inherit}
         <div class="card-hd">กราฟเปรียบเทียบคะแนน</div>
         <div class="chart-box"><canvas id="ch"></canvas></div>
       </div>
+      <!-- skg overview -->
+      <div class="card" id="skg-overview-card" style="display:none">
+        <div class="card-hd">
+          ผล สก. ภาพรวม
+          <span class="card-hd-r" id="skg-overview-meta"></span>
+        </div>
+        <div id="skg-overview-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px"></div>
+      </div>
     </div>
 
     <div class="col-r">
@@ -666,6 +683,14 @@ button,select,input,textarea{font-family:inherit}
       <div class="card">
         <div class="card-hd">รายละเอียดเขต</div>
         <div id="dist-detail"><div style="color:var(--n400);font-size:12px;text-align:center;padding:14px 0">คลิกที่เขตเพื่อดูผลคะแนน</div></div>
+      </div>
+      <!-- skg card -->
+      <div class="card" id="skg-card" style="display:none">
+        <div class="card-hd" style="justify-content:space-between">
+          <span id="skg-card-title">ผล สก.</span>
+          <button onclick="closeSKGCard()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--n500);padding:0;line-height:1">✕</button>
+        </div>
+        <div id="skg-card-body"></div>
       </div>
     </div>
   </div>
@@ -1074,7 +1099,13 @@ function renderDistricts(dw,cs){
     return `<div class="li">${av}${c.name.split(' ')[0]}</div>`;
   }).join('');
 }
-function selectDistrict(i){selectedDistrict=i;if(currentData)renderDistricts(currentData.distWin,currentData.cands);}
+function selectDistrict(i){
+  selectedDistrict=i;
+  if(currentData) renderDistricts(currentData.distWin,currentData.cands);
+  const dname = currentData && currentData.distWin[i] ? currentData.distWin[i].name : null;
+  if(dname && skgData[dname]) showSKGCard(dname);
+  else document.getElementById('skg-card').style.display='none';
+}
 function showDistrictDetail(dw,cs,i){
   const d=dw[i];const el=document.getElementById('dist-detail');
   if(!d||!d.counted||!d.winner){el.innerHTML=`<div class="dd-box"><div class="dd-title">${d?'เขต'+d.name:''}</div><div style="font-size:12px;color:var(--n500)">${d?'ยังไม่มีข้อมูลคะแนน':'—'}</div></div>`;return;}
@@ -1272,6 +1303,7 @@ async function loadSKGSheet(url){
     const districts=Object.keys(skgData).length;
     console.log('SKG loaded:',districts,'districts,',totalCands,'candidates');
     alert('โหลดข้อมูล สก. สำเร็จ '+districts+' เขต รวม '+totalCands+' ผู้สมัคร');
+    renderSKGOverview();
   }catch(e){
     alert('โหลด Sheet สก. ไม่สำเร็จ: '+e.message);
   }
@@ -1478,6 +1510,82 @@ function exportJSON(){const b=new Blob([JSON.stringify(cands,null,2)],{type:'app
 function exportCSV(){const rows=[['name','party','votes','color','avatar','partyLogo'],...cands.map(c=>[c.name,c.party,c.votes,c.color,c.avatar,c.partyLogo])];const b=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.csv';a.click();}
 function copyJSON(){navigator.clipboard.writeText(JSON.stringify(cands,null,2)).then(()=>alert('คัดลอกแล้ว!')).catch(()=>alert('คัดลอกไม่ได้'));}
 function updateExpPreview(){document.getElementById('exp-prev').textContent=JSON.stringify(cands,null,2);}
+
+// ── SKG DASHBOARD ────────────────────────────────────────────────────
+function renderSKGOverview(){
+  const card = document.getElementById('skg-overview-card');
+  const body = document.getElementById('skg-overview-body');
+  const meta = document.getElementById('skg-overview-meta');
+  if(!skgData || !Object.keys(skgData).length){ card.style.display='none'; return; }
+
+  const districts = Object.keys(skgData);
+  const totalElected = districts.reduce((s,d)=> s + skgData[d].filter(c=>c.elected).length, 0);
+  meta.textContent = districts.length + ' เขต · ' + totalElected + ' ที่นั่ง';
+  card.style.display = 'block';
+
+  body.innerHTML = districts.map(dname => {
+    const cands = skgData[dname];
+    const elected = cands.filter(c=>c.elected);
+    const all = [...cands].sort((a,b)=>b.votes-a.votes).slice(0,3);
+    return `<div class="skg-dist-mini" onclick="showSKGCard('${dname}')">
+      <div class="skg-dist-mini-hd">
+        <span>${dname}</span>
+        <span class="skg-dist-mini-tag" style="background:var(--g50);color:var(--g600)">${elected.length} ที่นั่ง</span>
+      </div>
+      ${all.map(s=>{
+        const col = s.color||'#5f6368';
+        const av = s.avatar
+          ? `<div class="skg-mini-av"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${s.name}','${col}','skg-mini-av',22)"></div>`
+          : svgAvHtml(s.name, col, 'skg-mini-av', 22);
+        return `<div class="skg-mini-row">
+          ${av}
+          <div class="skg-mini-name" style="color:${s.elected?col:'var(--n700)'};font-weight:${s.elected?600:400}">${s.elected?'✓ ':''}${s.name.split(' ').slice(0,2).join(' ')}</div>
+          <div class="skg-mini-votes">${s.votes.toLocaleString()}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function showSKGCard(distName){
+  const card = document.getElementById('skg-card');
+  const body = document.getElementById('skg-card-body');
+  const title = document.getElementById('skg-card-title');
+  const cands = skgData[distName];
+  if(!cands||!cands.length){ card.style.display='none'; return; }
+
+  title.textContent = 'ผล สก. เขต' + distName;
+  card.style.display = 'block';
+  const maxV = cands[0].votes || 1;
+
+  body.innerHTML = cands.map((s,si)=>{
+    const col = s.color || PRESET[si%PRESET.length];
+    const bw = (s.votes/maxV*100).toFixed(1);
+    const av = s.avatar
+      ? `<div class="skg-av"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.outerHTML=svgAvHtml('${s.name}','${col}','skg-av',36)"></div>`
+      : svgAvHtml(s.name, col, 'skg-av', 36);
+    return `<div class="skg-row">
+      <div class="skg-rank" style="color:${s.elected?col:'var(--n400)'}">${si+1}</div>
+      ${av}
+      <div class="skg-info">
+        <div class="skg-name" style="color:${s.elected?col:'var(--n800)'};font-weight:${s.elected?600:400}">${s.name}</div>
+        <div class="skg-party">${s.party}</div>
+        <div class="skg-bar-t"><div class="skg-bar-f" style="width:${bw}%;background:${col}"></div></div>
+      </div>
+      <div class="skg-score">
+        <div class="skg-votes">${s.votes.toLocaleString()}</div>
+        ${s.elected?'<div class="skg-elected">✓ ได้รับเลือก</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // scroll card into view
+  setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
+}
+
+function closeSKGCard(){
+  document.getElementById('skg-card').style.display='none';
+}
 
 // ── INIT ────────────────────────────────────────────────────
 buildCP();
