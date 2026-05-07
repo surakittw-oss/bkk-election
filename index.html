@@ -541,7 +541,12 @@ button,select,input,textarea{font-family:inherit}
           <button class="btn-p" onclick="loadGSheetURL()">โหลด</button>
           <span style="font-size:11px;color:var(--n500)">คอลัมน์ candidates: <code style="font-size:10px;background:var(--n100);padding:1px 4px;border-radius:3px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code></span>
         </div>
-        <div class="hint-t" style="margin-top:4px">คอลัมน์ districts: <code>district, counted, votes_1, votes_2, votes_3 …</code> · counted: 1=นับแล้ว 0=ยังไม่</div>
+        <div class="hint-t" style="margin-top:6px">
+          คอลัมน์ districts: <code>district, counted, votes_1, votes_2, votes_3 …</code> · counted: 1=นับแล้ว 0=ยังไม่<br>
+          <strong style="color:var(--n700)">💡 วิธีได้ลิงก์ Sheet เขตที่ถูกต้อง:</strong>
+          คลิก tab <strong>districts</strong> ใน Google Sheets → คัดลอก URL จาก address bar
+          — URL จะมี <code>#gid=xxxx</code> ต่อท้าย อย่าลืมคัดลอกมาด้วย
+        </div>
       </div>
       <div id="pm-api" style="display:none">
         <div class="src-row">
@@ -1076,10 +1081,16 @@ function showDistrictDetail(dw,cs,i){
 }
 
 // ── GOOGLE SHEETS ────────────────────────────────────────────
-function sheetURLtoCSV(url){
-  const m=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  if(!m)throw new Error('ไม่พบ Spreadsheet ID ในลิงก์');
-  return `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=0`;
+function sheetURLtoCSV(url, gidOverride){
+  // Extract Spreadsheet ID
+  const mId = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if(!mId) throw new Error('ไม่พบ Spreadsheet ID ในลิงก์\nกรุณาตรวจสอบว่าเป็น URL จาก Google Sheets');
+  const sheetId = mId[1];
+  // Extract gid from URL — supports #gid=, ?gid=, &gid=
+  let gid = gidOverride || '0';
+  const mGid = url.match(/[#&?]gid=([0-9]+)/);
+  if(mGid) gid = mGid[1];
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 }
 function parseCSVLine(line){
   const r=[];let cur='',inQ=false;
@@ -1139,7 +1150,18 @@ async function loadDistrictSheet(url){
   try{
     const csvUrl = sheetURLtoCSV(url);
     const res = await fetch(csvUrl);
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(!res.ok){
+      if(res.status===400) throw new Error(
+        'HTTP 400 — Sheet ยังไม่ได้ตั้งเป็น Public\n\n' +
+        'วิธีแก้:\n' +
+        '1. เปิด Google Sheets → Share\n' +
+        '2. เปลี่ยนเป็น "Anyone with the link" → Viewer\n' +
+        '3. คัดลอก URL ใหม่จาก address bar\n\n' +
+        'ถ้าตั้ง Public แล้วยังเกิด 400:\n' +
+        'ลอง File → Share → Publish to web → Sheet districts → CSV'
+      );
+      throw new Error('HTTP '+res.status);
+    }
     const text = await res.text();
     const lines = text.trim().split('\n').filter(l=>l.trim());
     if(lines.length < 2) throw new Error('ไม่พบข้อมูลใน Sheet เขต');
