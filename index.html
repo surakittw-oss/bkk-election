@@ -529,11 +529,19 @@ button,select,input,textarea{font-family:inherit}
     <div class="src-pane">
       <div id="pm-mock"><span style="font-size:11px;color:var(--n500)">ข้อมูลจำลอง — อัปเดตทุก 5 วินาที</span></div>
       <div id="pm-gsheet" style="display:none">
-        <div class="src-row">
-          <input class="inp" id="gs-url" placeholder="วาง Google Sheet Share Link ที่นี่" style="flex:1;min-width:200px">
-          <button class="btn-p" onclick="loadGSheetURL()">โหลด</button>
+        <div class="src-row" style="margin-bottom:6px">
+          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0">Sheet ผู้สมัคร</span>
+          <input class="inp" id="gs-url" placeholder="Share Link — Sheet ผู้สมัคร (candidates)" style="flex:1;min-width:180px">
         </div>
-        <div class="hint-t">Share → Anyone with the link · คอลัมน์: <code>Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code></div>
+        <div class="src-row" style="margin-bottom:6px">
+          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0">Sheet เขต</span>
+          <input class="inp" id="gs-dist-url" placeholder="Share Link — Sheet คะแนนเขต (districts) ไม่บังคับ" style="flex:1;min-width:180px">
+        </div>
+        <div class="src-row">
+          <button class="btn-p" onclick="loadGSheetURL()">โหลด</button>
+          <span style="font-size:11px;color:var(--n500)">คอลัมน์ candidates: <code style="font-size:10px;background:var(--n100);padding:1px 4px;border-radius:3px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code></span>
+        </div>
+        <div class="hint-t" style="margin-top:4px">คอลัมน์ districts: <code>district, counted, votes_1, votes_2, votes_3 …</code> · counted: 1=นับแล้ว 0=ยังไม่</div>
       </div>
       <div id="pm-api" style="display:none">
         <div class="src-row">
@@ -885,6 +893,7 @@ function svgAvHtml(name, color, cls, size=32) {
 let cands=JSON.parse(JSON.stringify(DEF));
 let simTimer=null,simStep=22,chart=null;
 let colorTarget=null,mode='mock',currentData=null,selectedDistrict=null;
+let districtData=null; // loaded from Sheet2
 let modalIdx=null,modalField=null,modalTempSrc=null;
 
 // ── MODE ────────────────────────────────────────────────────
@@ -904,7 +913,18 @@ function mockData(){
   const p=Math.min(0.18+simStep*0.018,0.99);
   const counted=Math.round(total*p);
   const sorted=[...cands].map(c=>({...c,votes:Math.round(c.votes*p*(1-spread/2+Math.random()*spread))})).sort((a,b)=>b.votes-a.votes);
-  const distWin=BKK_DISTRICTS.map((name,i)=>({name,winner:sorted[Math.abs((i*7+name.charCodeAt(0))%sorted.length)],counted:i<counted}));
+  let distWin;
+  if(districtData&&districtData.length>0){
+    distWin=BKK_DISTRICTS.map(name=>{
+      const row=districtData.find(r=>r.district===name);
+      if(!row||!row.counted)return{name,winner:null,counted:false};
+      const dv=sorted.map((c,ci)=>({...c,votes:row['votes_'+(ci+1)]||0}));
+      const best=dv.reduce((a,b)=>b.votes>a.votes?b:a,dv[0]);
+      return{name,winner:best,counted:true,distVotes:dv};
+    });
+  } else {
+    distWin=BKK_DISTRICTS.map((name,i)=>({name,winner:sorted[Math.abs((i*7+name.charCodeAt(0))%sorted.length)],counted:i<counted}));
+  }
   return{cands:sorted,counted,total,distWin,updated:new Date()};
 }
 function startSim(){
@@ -1025,7 +1045,15 @@ function selectDistrict(i){selectedDistrict=i;if(currentData)renderDistricts(cur
 function showDistrictDetail(dw,cs,i){
   const d=dw[i];const el=document.getElementById('dist-detail');
   if(!d||!d.counted){el.innerHTML=`<div class="dd-box"><div class="dd-title">${d?'เขต'+d.name:''}</div><div style="font-size:12px;color:var(--n500)">${d?'ยังไม่นับคะแนน':'—'}</div></div>`;return;}
-  const dc=cs.map(c=>({...c,dv:Math.round(c.votes*(0.7+Math.abs(Math.sin(i*c.id))*0.6)/cs.length*(2.5+Math.abs(Math.cos(i+c.id))))})).sort((a,b)=>b.dv-a.dv);
+  // Use real district votes if available, else simulate
+  let dc;
+  if(d.distVotes && d.distVotes.length > 0){
+    dc = d.distVotes.map(c=>({...c,dv:c.votes})).filter(c=>c.dv>0).sort((a,b)=>b.dv-a.dv);
+    if(!dc.length) dc = cs.map(c=>({...c,dv:Math.round(c.votes*(0.7+Math.abs(Math.sin(i*c.id))*0.6)/cs.length*(2.5+Math.abs(Math.cos(i+c.id))))})).sort((a,b)=>b.dv-a.dv);
+  } else {
+    dc = cs.map(c=>({...c,dv:Math.round(c.votes*(0.7+Math.abs(Math.sin(i*c.id))*0.6)/cs.length*(2.5+Math.abs(Math.cos(i+c.id))))})).sort((a,b)=>b.dv-a.dv);
+  }
+  const isReal = d.distVotes && d.distVotes.length > 0;
   const dt=dc.reduce((s,c)=>s+c.dv,0);
   el.innerHTML=`<div class="dd-box"><div class="dd-title">เขต${d.name}<span class="dd-sub">ผลโดยประมาณ</span></div>
     ${dc.map((c,idx)=>{
@@ -1070,14 +1098,25 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2)throw new Error('ไม่พบข้อมูล (ต้องมีอย่างน้อย 2 แถว)');
     const rows=lines.slice(1).map(parseCSVLine);
+    // Auto-detect offset: if col A is "No" (number or blank), shift +1
+    // Detect by checking if header row has "no" or "num" in col 0
+    const header=parseCSVLine(lines[0]).map(h=>(h||'').toLowerCase().replace(/[^a-zก-ฮ]/g,''));
+    const off=(header[0]==='no'||header[0]==='num'||header[0]==='ลำดับ'||header[0]==='ที')?1:0;
     const parsed=rows.map((r,i)=>({
-      id:i+1,name:(r[0]||'ผู้สมัคร '+(i+1)).replace(/^"+|"+$/g,''),
-      party:(r[1]||'อิสระ').replace(/^"+|"+$/g,''),
-      votes:parseInt((r[2]||'0').replace(/[^0-9]/g,''))||0,
-      color:(r[3]||PRESET[i%PRESET.length]).replace(/^"+|"+$/g,'').trim()||PRESET[i%PRESET.length],
-      avatar:(r[4]||'').replace(/^"+|"+$/g,''),partyLogo:(r[5]||'').replace(/^"+|"+$/g,''),
+      id:i+1,
+      name:(r[0+off]||'ผู้สมัคร '+(i+1)).replace(/^"+|"+$/g,'').trim(),
+      party:(r[1+off]||'อิสระ').replace(/^"+|"+$/g,'').trim(),
+      votes:parseInt((r[2+off]||'0').replace(/[^0-9]/g,''))||0,
+      color:((r[3+off]||'').replace(/^"+|"+$/g,'').trim()||PRESET[i%PRESET.length]),
+      avatar:(r[4+off]||'').replace(/^"+|"+$/g,'').trim(),
+      partyLogo:(r[5+off]||'').replace(/^"+|"+$/g,'').trim(),
     })).filter(c=>c.votes>0).sort((a,b)=>b.votes-a.votes);
-    if(!parsed.length)throw new Error('ไม่พบคะแนน — ตรวจสอบคอลัมน์ Votes');
+    if(!parsed.length){
+      const sample=rows[0]||[];
+      throw new Error(`ไม่พบคะแนน — ตรวจสอบว่าคอลัมน์มีค่าตัวเลขในช่อง Votes\n`+
+        `ตรวจพบ ${rows.length} แถว, offset=${off}\n`+
+        `ตัวอย่างแถวแรก: [${sample.slice(0,5).join(' | ')}]`);
+    }
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
     document.getElementById('live-txt').textContent='โหลดแล้ว';
@@ -1085,8 +1124,56 @@ async function loadFromCSVUrl(csvUrl,lbl){
     alert('โหลดสำเร็จ '+cands.length+' ผู้สมัคร');
   }catch(e){alert('โหลดไม่สำเร็จ:\n'+e.message);document.getElementById('live-txt').textContent='Error';}
 }
-async function loadGSheetURL(){const url=document.getElementById('gs-url').value.trim();if(!url){alert('กรุณาวาง Share Link');return;}try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){alert(e.message);}}
+async function loadGSheetURL(){
+  const url=document.getElementById('gs-url').value.trim();
+  if(!url){alert('กรุณาวาง Share Link ของ Sheet ผู้สมัคร');return;}
+  try{
+    await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
+    // Also load district sheet if provided
+    const distUrl=document.getElementById('gs-dist-url')?.value.trim();
+    if(distUrl) await loadDistrictSheet(distUrl);
+  }catch(e){alert(e.message);}
+}
+
+async function loadDistrictSheet(url){
+  try{
+    const csvUrl = sheetURLtoCSV(url);
+    const res = await fetch(csvUrl);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text = await res.text();
+    const lines = text.trim().split('\n').filter(l=>l.trim());
+    if(lines.length < 2) throw new Error('ไม่พบข้อมูลใน Sheet เขต');
+    const header = parseCSVLine(lines[0]).map(h=>(h||'').toLowerCase().trim());
+    const rows = lines.slice(1).map(parseCSVLine);
+    districtData = rows.map(r => {
+      const obj = {};
+      header.forEach((h,i) => {
+        const val = (r[i]||'').replace(/^"+|"+$/g,'').trim();
+        if(h === 'district') obj.district = val;
+        else if(h === 'counted') obj.counted = val==='1'||val.toLowerCase()==='true'||val==='TRUE';
+        else if(h.startsWith('votes_')) obj[h] = parseInt(val)||0;
+      });
+      return obj;
+    }).filter(r => r.district);
+    console.log('District data loaded:', districtData.length, 'rows');
+    alert('โหลดข้อมูลเขต '+districtData.length+' เขตสำเร็จ');
+    // re-render dashboard
+    simStep=60; renderDash(mockData());
+  }catch(e){
+    alert('โหลด Sheet เขตไม่สำเร็จ: '+e.message);
+  }
+}
+
 async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url){alert('กรุณาวาง Share Link');return;}try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){alert(e.message);}}
+async function loadGSheetURLImport(){
+  const url=document.getElementById('gs-url2').value.trim();
+  if(!url){alert('กรุณาวาง Share Link ของ Sheet ผู้สมัคร');return;}
+  try{
+    await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
+    const distUrl=document.getElementById('gs-dist-url2')?.value.trim();
+    if(distUrl) await loadDistrictSheet(distUrl);
+  }catch(e){alert(e.message);}
+}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url){alert('กรุณาใส่ API URL');return;}
   clearInterval(simTimer);
