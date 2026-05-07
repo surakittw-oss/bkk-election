@@ -1108,25 +1108,51 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const text=await res.text();
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2)throw new Error('ไม่พบข้อมูล (ต้องมีอย่างน้อย 2 แถว)');
-    const rows=lines.slice(1).map(parseCSVLine);
-    // Auto-detect offset: if col A is "No" (number or blank), shift +1
-    // Detect by checking if header row has "no" or "num" in col 0
-    const header=parseCSVLine(lines[0]).map(h=>(h||'').toLowerCase().replace(/[^a-zก-ฮ]/g,''));
-    const off=(header[0]==='no'||header[0]==='num'||header[0]==='ลำดับ'||header[0]==='ที')?1:0;
+    // ── Smart header finder ──────────────────────────────────────────
+    // Find the REAL data header row by looking for "name" or "votes" keyword
+    // Skip title rows, note rows, blank rows
+    let headerIdx = 0;
+    for(let i=0;i<Math.min(lines.length,6);i++){
+      const cols = parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase().replace(/[^a-z]/g,''));
+      if(cols.includes('name') || cols.includes('votes') || cols.includes('party')){
+        headerIdx = i;
+        break;
+      }
+    }
+    const header = parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
+    // Detect offset: col A = "no" or "num" or blank → shift +1
+    const firstH = header[0].replace(/[^a-zก-ฮ]/g,'');
+    const off = (firstH==='no'||firstH==='num'||firstH===''||firstH==='ลำดับ'||firstH==='ที')?1:0;
+    // Parse data rows — skip header rows and stop at summary/note rows
+    const rows = lines.slice(headerIdx+1).map(parseCSVLine).filter(r=>{
+      const first = (r[0]||'').replace(/^"+|"+$/g,'').trim();
+      if(!first) return false;
+      // Skip emoji/note/summary rows
+      if(first.startsWith('📋')||first.startsWith('รวม')||first.startsWith('•')||first.startsWith('⚠️')) return false;
+      // Skip rows with very long first cell (description rows)
+      if(first.length > 30) return false;
+      // Skip rows where votes column is non-numeric (description/header row)
+      const rawVotes = (r[2+off]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim();
+      if(rawVotes && isNaN(parseInt(rawVotes))) return false;
+      return true;
+    });
+    // Clean and parse
     const parsed=rows.map((r,i)=>({
       id:i+1,
       name:(r[0+off]||'ผู้สมัคร '+(i+1)).replace(/^"+|"+$/g,'').trim(),
       party:(r[1+off]||'อิสระ').replace(/^"+|"+$/g,'').trim(),
-      votes:parseInt((r[2+off]||'0').replace(/[^0-9]/g,''))||0,
+      votes:parseInt((r[2+off]||'0').replace(/[^0-9]/g,''))||0,  // strip commas+quotes
       color:((r[3+off]||'').replace(/^"+|"+$/g,'').trim()||PRESET[i%PRESET.length]),
       avatar:(r[4+off]||'').replace(/^"+|"+$/g,'').trim(),
       partyLogo:(r[5+off]||'').replace(/^"+|"+$/g,'').trim(),
-    })).filter(c=>c.votes>0).sort((a,b)=>b.votes-a.votes);
+    })).filter(c=>c.votes>0 && c.name.length<50).sort((a,b)=>b.votes-a.votes);
     if(!parsed.length){
       const sample=rows[0]||[];
-      throw new Error(`ไม่พบคะแนน — ตรวจสอบว่าคอลัมน์มีค่าตัวเลขในช่อง Votes\n`+
-        `ตรวจพบ ${rows.length} แถว, offset=${off}\n`+
-        `ตัวอย่างแถวแรก: [${sample.slice(0,5).join(' | ')}]`);
+      throw new Error(
+        `ไม่พบคะแนน — ตรวจสอบว่าช่อง Votes มีตัวเลข\n`+
+        `ตรวจพบ ${rows.length} แถวข้อมูล, header ที่แถว ${headerIdx+1}, offset=${off}\n`+
+        `ตัวอย่างแถวแรก: [${sample.slice(0,5).join(' | ')}]`
+      );
     }
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
@@ -1165,18 +1191,36 @@ async function loadDistrictSheet(url){
     const text = await res.text();
     const lines = text.trim().split('\n').filter(l=>l.trim());
     if(lines.length < 2) throw new Error('ไม่พบข้อมูลใน Sheet เขต');
-    const header = parseCSVLine(lines[0]).map(h=>(h||'').toLowerCase().trim());
-    const rows = lines.slice(1).map(parseCSVLine);
+    // Smart header: find row with "district" and "counted"
+    let distHdrIdx = 0;
+    for(let i=0;i<Math.min(lines.length,5);i++){
+      const cols = parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
+      if(cols.some(c=>c.includes('district')) && cols.some(c=>c.includes('counted'))){
+        distHdrIdx = i; break;
+      }
+    }
+    const header = parseCSVLine(lines[distHdrIdx]).map(h=>(h||'').toLowerCase().trim());
+    const rows = lines.slice(distHdrIdx+1).map(parseCSVLine).filter(r=>{
+      const first = (r[0]||'').replace(/^"+|"+$/g,'').trim();
+      if(!first) return false;
+      // skip description row (counted col looks like text not 0/1)
+      const cntVal = (r[1]||'').replace(/^"+|"+$/g,'').trim();
+      if(cntVal.includes('=') || cntVal.includes('นับ') || first.includes('ชื่อเขต')) return false;
+      // skip summary row
+      if(first.startsWith('รวม') || first.startsWith('📋')) return false;
+      return true;
+    });
     districtData = rows.map(r => {
       const obj = {};
       header.forEach((h,i) => {
-        const val = (r[i]||'').replace(/^"+|"+$/g,'').trim();
+        // strip quotes and commas from all values
+        const val = (r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim();
         if(h === 'district') obj.district = val;
-        else if(h === 'counted') obj.counted = val==='1'||val.toLowerCase()==='true'||val==='TRUE';
+        else if(h === 'counted') obj.counted = val==='1'||val.toLowerCase()==='true';
         else if(h.startsWith('votes_')) obj[h] = parseInt(val)||0;
       });
       return obj;
-    }).filter(r => r.district);
+    }).filter(r => r.district && r.district.length < 30);
     console.log('District data loaded:', districtData.length, 'rows');
     alert('โหลดข้อมูลเขต '+districtData.length+' เขตสำเร็จ');
     // re-render dashboard
