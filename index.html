@@ -1615,12 +1615,14 @@ const FIREBASE_DB_URL = "https://bkk-election-vote-default-rtdb.asia-southeast1.
 
 // Firebase config — Realtime Database only (no API key needed for public read)
 const firebaseConfig = {
-  databaseURL: FIREBASE_DB_URL,
-  // ⚠️ ถ้าต้องการ write ต้องใส่ projectId และ apiKey
-  // projectId: "bkk-election-vote-default-rtdb",
-  // apiKey: "AIza...",  // ใส่จาก Firebase Console → Project Settings
+    apiKey: "AIzaSyBZrGgrbCSycCe46TZyXtG1boJMYWcAN-o",
+    authDomain: "bkk-election-vote.firebaseapp.com",
+    databaseURL: "https://bkk-election-vote-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "bkk-election-vote",
+    storageBucket: "bkk-election-vote.firebasestorage.app",
+    messagingSenderId: "1020264986175",
+    appId: "1:1020264986175:web:3ee5c3cd1d93f16c882a8a",
 };
-
 let fbApp = null;
 let fbDb  = null;
 let fbConnected = false;
@@ -1774,8 +1776,14 @@ async function loadFromFirebase() {
 }
 
 // ── INIT ────────────────────────────────────────────────────
-buildCP();
+
+  buildCP();
 startSim();
+// Auto-switch to Firebase mode
+setMode('firebase', document.querySelector(".st[onclick*='firebase']"));
+document.getElementById('user-av').textContent = '👤';
+document.getElementById('user-name').textContent = 'ผู้ใช้';
+initFirebase();
 // Auto-show app (no auth)
 document.getElementById('user-av').textContent = '👤';
 document.getElementById('user-name').textContent = 'ผู้ใช้';
