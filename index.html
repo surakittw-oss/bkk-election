@@ -425,6 +425,24 @@ button,select,input,textarea{font-family:inherit}
   .cr-av.r1{width:36px !important;height:36px !important}
 }
 
+/* ── SKG SECTION ─────────────────────────── */
+.skg-section{margin-top:12px;padding-top:10px;border-top:1px dashed var(--n200)}
+.skg-title{font-size:10px;font-weight:600;color:var(--n500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.skg-title::after{content:'';flex:1;height:.5px;background:var(--n200)}
+.skg-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--n100);position:relative}
+.skg-row:last-child{border-bottom:none}
+.skg-rank{font-size:11px;font-weight:600;color:var(--n400);text-align:right;width:18px;flex-shrink:0}
+.skg-av{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--n200);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0;overflow:hidden}
+.skg-info{flex:1;min-width:0}
+.skg-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skg-party{font-size:10px;color:var(--n500);margin-top:1px}
+.skg-bar-t{height:3px;background:var(--n100);border-radius:1px;margin-top:4px;overflow:hidden}
+.skg-bar-f{height:100%;border-radius:1px;transition:width .8s ease}
+.skg-score{text-align:right;flex-shrink:0;min-width:60px}
+.skg-votes{font-size:12px;font-weight:600}
+.skg-elected{font-size:9px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--g50);color:var(--g600);border:1px solid var(--g200);margin-top:2px;display:inline-block}
+.skg-no-data{font-size:12px;color:var(--n400);padding:10px 0;text-align:center}
+
 /* ── ANIMATIONS ─────────────────────────── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .sc{animation:fadeUp .25s ease both}
@@ -542,10 +560,13 @@ button,select,input,textarea{font-family:inherit}
           <span style="font-size:11px;color:var(--n500)">คอลัมน์ candidates: <code style="font-size:10px;background:var(--n100);padding:1px 4px;border-radius:3px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code></span>
         </div>
         <div class="hint-t" style="margin-top:6px">
-          คอลัมน์ districts: <code>district, counted, votes_1, votes_2, votes_3 …</code> · counted: 1=นับแล้ว 0=ยังไม่<br>
-          <strong style="color:var(--n700)">💡 วิธีได้ลิงก์ Sheet เขตที่ถูกต้อง:</strong>
-          คลิก tab <strong>districts</strong> ใน Google Sheets → คัดลอก URL จาก address bar
-          — URL จะมี <code>#gid=xxxx</code> ต่อท้าย อย่าลืมคัดลอกมาด้วย
+          คอลัมน์ districts: <code>district, counted, votes_1, votes_2 …</code> · counted: 1=นับแล้ว 0=ยังไม่<br>
+          คอลัมน์ skg: <code>district, no, name, party, votes, elected, color, avatar_url</code><br>
+          <strong style="color:var(--n700)">💡 วิธี copy link:</strong> คลิก <strong>tab ชื่อ Sheet</strong> ที่ต้องการ → URL จะมี <code>#gid=xxxx</code> → คัดลอก URL ทั้งหมดมาวาง
+        </div>
+        <div class="src-row" style="margin-top:6px">
+          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;padding-top:7px">Sheet สก.</span>
+          <input class="inp" id="gs-skg-url" placeholder="Share Link — Sheet skg (ไม่บังคับ)" style="flex:1;min-width:180px">
         </div>
       </div>
       <div id="pm-api" style="display:none">
@@ -899,6 +920,7 @@ let cands=JSON.parse(JSON.stringify(DEF));
 let simTimer=null,simStep=22,chart=null;
 let colorTarget=null,mode='mock',currentData=null,selectedDistrict=null;
 let districtData=null; // loaded from Sheet2
+let skgData={}; // loaded from Sheet skg — keyed by district name
 let modalIdx=null,modalField=null,modalTempSrc=null;
 
 // ── MODE ────────────────────────────────────────────────────
@@ -1083,7 +1105,33 @@ function showDistrictDetail(dw,cs,i){
         <div style="text-align:right;min-width:68px"><div style="font-size:11px;font-weight:500">${c.dv.toLocaleString()}</div><div style="font-size:10px;color:var(--n500)">${pct}%</div></div>
       </div>`;
     }).join('')}
-  </div>`;
+    ${(()=>{
+      const skg=skgData[d.name]||[];
+      if(!skg.length) return '';
+      const maxV=skg[0].votes||1;
+      return `<div class="skg-section">
+        <div class="skg-title">ผล สก. เขต${d.name}</div>
+        ${skg.map((s,si)=>{
+          const bw=(s.votes/maxV*100).toFixed(1);
+          const col=s.color||PRESET[si%PRESET.length];
+          const av=s.avatar?`<div class="skg-av" style="overflow:hidden"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${s.name}','${col}','skg-av',30)"></div>`:svgAvHtml(s.name,col,'skg-av',30);
+          return `<div class="skg-row">
+            <div class="skg-rank" style="color:${s.elected?col:'var(--n400)'}">${si+1}</div>
+            ${av}
+            <div class="skg-info">
+              <div class="skg-name" style="color:${s.elected?col:'var(--n800)'};font-weight:${s.elected?600:400}">${s.name}</div>
+              <div class="skg-party">${s.party}</div>
+              <div class="skg-bar-t"><div class="skg-bar-f" style="width:${bw}%;background:${col}"></div></div>
+            </div>
+            <div class="skg-score">
+              <div class="skg-votes">${s.votes.toLocaleString()}</div>
+              ${s.elected?'<div class="skg-elected">✓ ได้รับเลือก</div>':''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    })()}
+  </div>\`;
 }
 
 // ── GOOGLE SHEETS ────────────────────────────────────────────
@@ -1178,6 +1226,57 @@ async function loadGSheetURL(){
   }catch(e){alert(e.message);}
 }
 
+async function loadSKGSheet(url){
+  try{
+    const csvUrl=sheetURLtoCSV(url);
+    const res=await fetch(csvUrl);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const lines=text.trim().split('\n').filter(l=>l.trim());
+    if(lines.length<2) throw new Error('ไม่พบข้อมูลใน Sheet สก.');
+    // Smart header detection
+    let hdrIdx=0;
+    for(let i=0;i<Math.min(lines.length,5);i++){
+      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
+      if(cols.some(c=>c.includes('district'))&&cols.some(c=>c.includes('name'))){hdrIdx=i;break;}
+    }
+    const hdr=parseCSVLine(lines[hdrIdx]).map(h=>(h||'').toLowerCase().replace(/[^a-z_]/g,'').trim());
+    const rows=lines.slice(hdrIdx+1).map(parseCSVLine).filter(r=>{
+      const f=(r[0]||'').replace(/^"+|"+$/g,'').trim();
+      if(!f||f.length>25) return false;
+      if(f.startsWith('รวม')||f.startsWith('📋')) return false;
+      return true;
+    });
+    // Build skgData keyed by district
+    skgData={};
+    rows.forEach(r=>{
+      const get=(k)=>{const i=hdr.indexOf(k);return i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';};
+      const dist=get('district');
+      if(!dist) return;
+      const entry={
+        no:parseInt(get('no'))||0,
+        name:get('name'),
+        party:get('party')||'อิสระ',
+        votes:parseInt(get('votes'))||0,
+        elected:get('elected')==='1'||get('elected').toLowerCase()==='true',
+        color:get('color')||'',
+        avatar:get('avatar_url')||get('avatar')||''
+      };
+      if(!entry.name) return;
+      if(!skgData[dist]) skgData[dist]=[];
+      skgData[dist].push(entry);
+    });
+    // Sort each district by votes desc
+    Object.keys(skgData).forEach(d=>skgData[d].sort((a,b)=>b.votes-a.votes));
+    const totalCands=Object.values(skgData).reduce((s,a)=>s+a.length,0);
+    const districts=Object.keys(skgData).length;
+    console.log('SKG loaded:',districts,'districts,',totalCands,'candidates');
+    alert('โหลดข้อมูล สก. สำเร็จ '+districts+' เขต รวม '+totalCands+' ผู้สมัคร');
+  }catch(e){
+    alert('โหลด Sheet สก. ไม่สำเร็จ: '+e.message);
+  }
+}
+
 async function loadDistrictSheet(url){
   try{
     const csvUrl = sheetURLtoCSV(url);
@@ -1244,6 +1343,8 @@ async function loadGSheetURLImport(){
     await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
     const distUrl=document.getElementById('gs-dist-url2')?.value.trim();
     if(distUrl) await loadDistrictSheet(distUrl);
+    const skgUrl=document.getElementById('gs-skg-url2')?.value.trim();
+    if(skgUrl) await loadSKGSheet(skgUrl);
   }catch(e){alert(e.message);}
 }
 async function loadAPI(){
