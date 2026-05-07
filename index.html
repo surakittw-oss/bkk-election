@@ -524,9 +524,9 @@ button,select,input,textarea{font-family:inherit}
   <div class="src-bar">
     <span class="src-lbl">แหล่งข้อมูล</span>
     <div class="src-tabs-wrap">
-      <button class="st on" onclick="setMode('mock',this)">จำลอง</button>
+      <button class="st" onclick="setMode('mock',this)">จำลอง</button>
       <button class="st" onclick="setMode('gsheet',this)">Google Sheets</button>
-      <button class="st" onclick="setMode('firebase',this)">Firebase</button>
+      <button class="st on" onclick="setMode('firebase',this)">Firebase</button>
       <button class="st" onclick="setMode('api',this)">JSON API</button>
     </div>
     <div class="src-pane">
@@ -1615,14 +1615,12 @@ const FIREBASE_DB_URL = "https://bkk-election-vote-default-rtdb.asia-southeast1.
 
 // Firebase config — Realtime Database only (no API key needed for public read)
 const firebaseConfig = {
-    apiKey: "AIzaSyBZrGgrbCSycCe46TZyXtG1boJMYWcAN-o",
-    authDomain: "bkk-election-vote.firebaseapp.com",
-    databaseURL: "https://bkk-election-vote-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "bkk-election-vote",
-    storageBucket: "bkk-election-vote.firebasestorage.app",
-    messagingSenderId: "1020264986175",
-    appId: "1:1020264986175:web:3ee5c3cd1d93f16c882a8a",
+  databaseURL: FIREBASE_DB_URL,
+  // ⚠️ ถ้าต้องการ write ต้องใส่ projectId และ apiKey
+  // projectId: "bkk-election-vote-default-rtdb",
+  // apiKey: "AIza...",  // ใส่จาก Firebase Console → Project Settings
 };
+
 let fbApp = null;
 let fbDb  = null;
 let fbConnected = false;
@@ -1656,6 +1654,10 @@ function setFBStatus(state, text) {
   if (!dot || !txt) return;
   dot.className = 'fb-dot ' + state;
   txt.textContent = text;
+  // Also update live badge
+  const liveTxt = document.getElementById('live-txt');
+  if(liveTxt && state === 'connected') liveTxt.textContent = 'Firebase';
+  else if(liveTxt && state === 'offline') liveTxt.textContent = 'ออฟไลน์';
 }
 
 // ── READ: Subscribe to realtime updates ──────────────────────────────
@@ -1667,7 +1669,13 @@ function startRealtimeListener() {
   fbListener = fbDb.ref('election/candidates');
   fbListener.on('value', snap => {
     const data = snap.val();
-    if (!data) return; // no data yet in Firebase
+    if (!data) {
+      // No Firebase data yet → fallback to simulation
+      console.log('Firebase: no data yet, using mock');
+      setFBStatus('offline', 'ไม่มีข้อมูล');
+      startSim();
+      return;
+    }
 
     // data is an array or object
     const arr = Array.isArray(data) ? data : Object.values(data);
@@ -1688,11 +1696,15 @@ function startRealtimeListener() {
     setFBStatus('connected', 'Sync แล้ว');
 
     // Re-render if on dashboard
-    if (mode !== 'mock') {
-      clearInterval(simTimer);
-      simStep = 60;
-      renderDash(mockData());
-    }
+    // Stop simulation, switch to Firebase data
+    clearInterval(simTimer);
+    document.getElementById('live-txt').textContent = 'Firebase';
+    simStep = 60;
+    renderDash(mockData());
+    if(Object.keys(skgData).length) renderSKGOverview();
+    // Update source label
+    const srcEl = document.getElementById('foot-src');
+    if(srcEl) srcEl.textContent = 'Firebase Realtime DB';
     console.log('Firebase data received:', cands.length, 'candidates');
   }, err => {
     console.warn('Firebase read error:', err.message);
@@ -1776,18 +1788,26 @@ async function loadFromFirebase() {
 }
 
 // ── INIT ────────────────────────────────────────────────────
-
-  buildCP();
-startSim();
-// Auto-switch to Firebase mode
-setMode('firebase', document.querySelector(".st[onclick*='firebase']"));
-document.getElementById('user-av').textContent = '👤';
-document.getElementById('user-name').textContent = 'ผู้ใช้';
-initFirebase();
+buildCP();
 // Auto-show app (no auth)
 document.getElementById('user-av').textContent = '👤';
 document.getElementById('user-name').textContent = 'ผู้ใช้';
-// Init Firebase
+
+// ── Default mode = Firebase ──────────────────────────────
+// ถ้า Firebase เชื่อมต่อได้ → โหลดจาก Firebase
+// ถ้าไม่ได้ → fallback เป็น Mock data อัตโนมัติ
+mode = 'firebase';
+['mock','gsheet','api'].forEach(k => {
+  const el = document.getElementById('pm-'+k);
+  if(el) el.style.display = 'none';
+});
+const fbEl = document.getElementById('pm-firebase');
+if(fbEl) fbEl.style.display = 'block';
+
+// Start sim briefly while Firebase loads (shows something fast)
+startSim();
+
+// Init Firebase — subscribe realtime
 initFirebase();
 
 // ── CANDIDATE DETAIL ──────────────────────────────────────────────
