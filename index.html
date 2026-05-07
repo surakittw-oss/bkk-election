@@ -6,6 +6,9 @@
 <title>ผลการเลือกตั้งผู้ว่า กทม — Bangkok Election Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<!-- Firebase Realtime Database SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 /* ── RESET & TOKENS ────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -452,6 +455,16 @@ button,select,input,textarea{font-family:inherit}
 .skg-mini-name{font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .skg-mini-votes{font-size:10px;color:var(--n500);flex-shrink:0}
 
+/* ── FIREBASE STATUS ────────────────────── */
+.fb-status{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--n200);background:var(--n50);white-space:nowrap;flex-shrink:0}
+.fb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.fb-dot.connected{background:#22c55e;animation:livepulse 2s infinite}
+.fb-dot.offline{background:var(--n400)}
+.fb-dot.saving{background:var(--amber);animation:livepulse .8s infinite}
+.fb-save-btn{background:var(--g500);color:#fff;border:none;border-radius:var(--r-sm);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.fb-save-btn:hover{background:var(--g600)}
+.fb-save-btn:disabled{opacity:.5;cursor:default}
+
 /* ── ANIMATIONS ─────────────────────────── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .sc{animation:fadeUp .25s ease both}
@@ -516,6 +529,10 @@ button,select,input,textarea{font-family:inherit}
     </div>
     <div class="nav-right">
       <div class="live-chip"><span class="live-dot"></span><span id="live-txt">Live</span></div>
+      <div class="fb-status" id="fb-status" title="Firebase Realtime Database">
+        <span class="fb-dot offline" id="fb-dot"></span>
+        <span id="fb-status-txt">Firebase</span>
+      </div>
       <div class="user-chip" onclick="toggleUserMenu()">
         <div class="user-av" id="user-av">?</div>
         <span id="user-name" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Demo</span>
@@ -551,31 +568,50 @@ button,select,input,textarea{font-family:inherit}
     <div class="src-tabs-wrap">
       <button class="st on" onclick="setMode('mock',this)">จำลอง</button>
       <button class="st" onclick="setMode('gsheet',this)">Google Sheets</button>
+      <button class="st" onclick="setMode('firebase',this)">Firebase</button>
       <button class="st" onclick="setMode('api',this)">JSON API</button>
     </div>
     <div class="src-pane">
       <div id="pm-mock"><span style="font-size:11px;color:var(--n500)">ข้อมูลจำลอง — อัปเดตทุก 5 วินาที</span></div>
       <div id="pm-gsheet" style="display:none">
-        <div class="src-row" style="margin-bottom:6px">
-          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0">Sheet ผู้สมัคร</span>
-          <input class="inp" id="gs-url" placeholder="Share Link — Sheet ผู้สมัคร (candidates)" style="flex:1;min-width:180px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn-p" onclick="loadGSheetURL()" style="flex-shrink:0">โหลด</button>
+          <button class="btn-g" onclick="toggleSheetPanel()" id="sheet-panel-toggle" style="flex-shrink:0">⚙ ตั้งค่า Sheet</button>
+          <span id="sheet-status" style="font-size:11px;color:var(--n500)">กรอก URL ในตั้งค่า Sheet ก่อนกดโหลด</span>
         </div>
-        <div class="src-row" style="margin-bottom:6px">
-          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0">Sheet เขต</span>
-          <input class="inp" id="gs-dist-url" placeholder="Share Link — Sheet คะแนนเขต (districts) ไม่บังคับ" style="flex:1;min-width:180px">
+        <div id="sheet-panel" style="display:none;margin-top:10px;background:var(--n50);border:1px solid var(--n200);border-radius:var(--r);padding:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--n700);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+            URL แต่ละ Sheet
+            <span style="font-size:10px;font-weight:400;color:var(--n500)">คลิก tab ชื่อ Sheet → URL จะมี <code style="background:var(--n200);padding:1px 4px;border-radius:3px;font-family:monospace">#gid=xxx</code> → คัดลอกทั้งหมด</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center">
+              <span style="font-size:11px;font-weight:500;color:var(--n700)">ผู้สมัคร</span>
+              <input class="inp" id="gs-url" placeholder="Sheet candidates — tab แรก #gid=0">
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center">
+              <span style="font-size:11px;font-weight:500;color:var(--n700)">คะแนนเขต</span>
+              <input class="inp" id="gs-dist-url" placeholder="Sheet districts — คลิก tab districts คัดลอก URL">
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center">
+              <span style="font-size:11px;font-weight:500;color:var(--n700)">สก. <span style="font-weight:400;color:var(--n400)">(ไม่บังคับ)</span></span>
+              <input class="inp" id="gs-skg-url" placeholder="Sheet skg — คลิก tab skg คัดลอก URL">
+            </div>
+          </div>
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--n200);font-size:10px;color:var(--n400);line-height:1.7">
+            ผู้สมัคร: <code style="font-family:monospace;background:var(--n100);padding:1px 4px;border-radius:3px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code>&ensp;
+            เขต: <code style="font-family:monospace;background:var(--n100);padding:1px 4px;border-radius:3px">district, counted, votes_1, votes_2…</code>&ensp;
+            สก.: <code style="font-family:monospace;background:var(--n100);padding:1px 4px;border-radius:3px">district, no, name, party, votes, elected, color, avatar_url</code>
+          </div>
         </div>
-        <div class="src-row">
-          <button class="btn-p" onclick="loadGSheetURL()">โหลด</button>
-          <span style="font-size:11px;color:var(--n500)">คอลัมน์ candidates: <code style="font-size:10px;background:var(--n100);padding:1px 4px;border-radius:3px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</code></span>
+      </div>
+      <div id="pm-firebase" style="display:none">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn-p" onclick="loadFromFirebase()">📥 โหลดจาก Firebase</button>
+          <span style="font-size:11px;color:var(--n500)" id="fb-src-status">เชื่อมต่อ Firebase Realtime DB</span>
         </div>
-        <div class="hint-t" style="margin-top:6px">
-          คอลัมน์ districts: <code>district, counted, votes_1, votes_2 …</code> · counted: 1=นับแล้ว 0=ยังไม่<br>
-          คอลัมน์ skg: <code>district, no, name, party, votes, elected, color, avatar_url</code><br>
-          <strong style="color:var(--n700)">💡 วิธี copy link:</strong> คลิก <strong>tab ชื่อ Sheet</strong> ที่ต้องการ → URL จะมี <code>#gid=xxxx</code> → คัดลอก URL ทั้งหมดมาวาง
-        </div>
-        <div class="src-row" style="margin-top:6px">
-          <span style="font-size:10px;color:var(--n500);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;padding-top:7px">Sheet สก.</span>
-          <input class="inp" id="gs-skg-url" placeholder="Share Link — Sheet skg (ไม่บังคับ)" style="flex:1;min-width:180px">
+        <div class="hint-t" style="margin-top:4px">
+          Real-time sync — ข้อมูลจะอัปเดตอัตโนมัติทุกครั้งที่ admin บันทึก · DB: <code>bkk-election-vote-default-rtdb</code>
         </div>
       </div>
       <div id="pm-api" style="display:none">
@@ -724,7 +760,10 @@ button,select,input,textarea{font-family:inherit}
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn-g" onclick="resetCands()">↺ รีเซ็ต</button>
-            <button class="btn-p" onclick="saveCands()">💾 บันทึก &amp; อัปเดต</button>
+            <button class="btn-p" onclick="saveCands()">💾 บันทึกใน Browser</button>
+              <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn" disabled>
+                <span>☁️</span> บันทึกขึ้น Firebase
+              </button>
           </div>
         </div>
         <div class="cms-card">
@@ -949,11 +988,19 @@ let skgData={}; // loaded from Sheet skg — keyed by district name
 let modalIdx=null,modalField=null,modalTempSrc=null;
 
 // ── MODE ────────────────────────────────────────────────────
+function toggleSheetPanel(){
+  const p=document.getElementById('sheet-panel');
+  const b=document.getElementById('sheet-panel-toggle');
+  const open=p.style.display==='none';
+  p.style.display=open?'block':'none';
+  b.textContent=open?'✕ ปิด':'⚙ ตั้งค่า Sheet';
+}
+
 function setMode(m,btn){
   mode=m;
   document.querySelectorAll('.st').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  ['mock','gsheet','api'].forEach(k=>{document.getElementById('pm-'+k).style.display=k===m?'':'none';});
+  ['mock','gsheet','firebase','api'].forEach(k=>{document.getElementById('pm-'+k).style.display=k===m?'':'none';});
   if(m==='mock')startSim();else{clearInterval(simTimer);document.getElementById('live-txt').textContent='หยุด';}
 }
 
@@ -1047,6 +1094,7 @@ function renderDash(d){
   }).join('');
   renderChart(d.cands,tv);
   renderDistricts(d.distWin,d.cands);
+  if(Object.keys(skgData).length) renderSKGOverview();
 }
 
 // ── CHART ───────────────────────────────────────────────────
@@ -1248,13 +1296,30 @@ async function loadFromCSVUrl(csvUrl,lbl){
 }
 async function loadGSheetURL(){
   const url=document.getElementById('gs-url').value.trim();
-  if(!url){alert('กรุณาวาง Share Link ของ Sheet ผู้สมัคร');return;}
+  const statusEl=document.getElementById('sheet-status');
+  if(!url){
+    document.getElementById('sheet-panel').style.display='block';
+    document.getElementById('sheet-panel-toggle').textContent='✕ ปิด';
+    document.getElementById('gs-url').focus();
+    return;
+  }
+  if(statusEl){statusEl.textContent='กำลังโหลด...';statusEl.style.color='var(--n500)';}
   try{
     await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
-    // Also load district sheet if provided
     const distUrl=document.getElementById('gs-dist-url')?.value.trim();
     if(distUrl) await loadDistrictSheet(distUrl);
-  }catch(e){alert(e.message);}
+    const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
+    if(skgUrl) await loadSKGSheet(skgUrl);
+    document.getElementById('sheet-panel').style.display='none';
+    document.getElementById('sheet-panel-toggle').textContent='⚙ ตั้งค่า Sheet';
+    const parts=['ผู้สมัคร'];
+    if(distUrl) parts.push('เขต');
+    if(skgUrl) parts.push('สก.');
+    if(statusEl){statusEl.textContent='✅ โหลดแล้ว: '+parts.join(' + ');statusEl.style.color='var(--g500)';}
+  }catch(e){
+    if(statusEl){statusEl.textContent='❌ '+e.message.slice(0,55);statusEl.style.color='var(--red)';}
+    else alert(e.message);
+  }
 }
 
 async function loadSKGSheet(url){
@@ -1587,12 +1652,177 @@ function closeSKGCard(){
   document.getElementById('skg-card').style.display='none';
 }
 
+// ── FIREBASE REALTIME DATABASE ───────────────────────────────────────
+const FIREBASE_DB_URL = "https://bkk-election-vote-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+// Firebase config — Realtime Database only (no API key needed for public read)
+const firebaseConfig = {
+  databaseURL: FIREBASE_DB_URL,
+  // ⚠️ ถ้าต้องการ write ต้องใส่ projectId และ apiKey
+  // projectId: "bkk-election-vote-default-rtdb",
+  // apiKey: "AIza...",  // ใส่จาก Firebase Console → Project Settings
+};
+
+let fbApp = null;
+let fbDb  = null;
+let fbConnected = false;
+let fbListener  = null; // realtime listener ref
+
+function initFirebase() {
+  try {
+    fbApp = firebase.initializeApp(firebaseConfig);
+    fbDb  = firebase.database();
+
+    // Monitor connection state
+    fbDb.ref('.info/connected').on('value', snap => {
+      fbConnected = snap.val() === true;
+      setFBStatus(fbConnected ? 'connected' : 'offline',
+                  fbConnected ? 'เชื่อมต่อแล้ว' : 'ออฟไลน์');
+      if (fbConnected) {
+        document.getElementById('fb-save-btn').disabled = false;
+        // Start realtime listener once connected
+        startRealtimeListener();
+      }
+    });
+  } catch(e) {
+    console.warn('Firebase init failed:', e.message);
+    setFBStatus('offline', 'ตั้งค่า Firebase ก่อน');
+  }
+}
+
+function setFBStatus(state, text) {
+  const dot  = document.getElementById('fb-dot');
+  const txt  = document.getElementById('fb-status-txt');
+  if (!dot || !txt) return;
+  dot.className = 'fb-dot ' + state;
+  txt.textContent = text;
+}
+
+// ── READ: Subscribe to realtime updates ──────────────────────────────
+function startRealtimeListener() {
+  if (!fbDb) return;
+  // Detach previous listener
+  if (fbListener) fbListener.off();
+
+  fbListener = fbDb.ref('election/candidates');
+  fbListener.on('value', snap => {
+    const data = snap.val();
+    if (!data) return; // no data yet in Firebase
+
+    // data is an array or object
+    const arr = Array.isArray(data) ? data : Object.values(data);
+    if (!arr.length) return;
+
+    cands = arr.map((c, i) => ({
+      id:        c.id        || i + 1,
+      name:      c.name      || 'ผู้สมัคร ' + (i+1),
+      party:     c.party     || 'อิสระ',
+      votes:     parseInt(c.votes) || 0,
+      color:     c.color     || PRESET[i % PRESET.length],
+      avatar:    c.avatar    || '',
+      partyLogo: c.partyLogo || '',
+    })).filter(c => c.votes > 0).sort((a, b) => b.votes - a.votes);
+
+    // Update live badge
+    document.getElementById('foot-src').textContent = 'Firebase (Real-time)';
+    setFBStatus('connected', 'Sync แล้ว');
+
+    // Re-render if on dashboard
+    if (mode !== 'mock') {
+      clearInterval(simTimer);
+      simStep = 60;
+      renderDash(mockData());
+    }
+    console.log('Firebase data received:', cands.length, 'candidates');
+  }, err => {
+    console.warn('Firebase read error:', err.message);
+    setFBStatus('offline', 'อ่านไม่ได้: ' + err.message.slice(0,30));
+  });
+}
+
+// ── WRITE: Save candidates to Firebase ───────────────────────────────
+async function saveToFirebase() {
+  if (!fbDb) {
+    alert('Firebase ยังไม่ได้เชื่อมต่อ\nตรวจสอบ Network และ Firebase Rules');
+    return;
+  }
+  const btn = document.getElementById('fb-save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> กำลังบันทึก...';
+  setFBStatus('saving', 'กำลัง save...');
+
+  try {
+    // Save to Firebase Realtime DB
+    await fbDb.ref('election/candidates').set(cands);
+    // Also save district data if available
+    if (districtData && districtData.length) {
+      await fbDb.ref('election/districts').set(districtData);
+    }
+    if (Object.keys(skgData).length) {
+      await fbDb.ref('election/skg').set(skgData);
+    }
+    // Save metadata
+    await fbDb.ref('election/meta').set({
+      updatedAt: new Date().toISOString(),
+      updatedBy: document.getElementById('user-name')?.textContent || 'admin',
+    });
+
+    setFBStatus('connected', 'บันทึกแล้ว ✓');
+    btn.innerHTML = '<span>✅</span> บันทึกแล้ว';
+    setTimeout(() => {
+      btn.innerHTML = '<span>☁️</span> บันทึกขึ้น Firebase';
+      btn.disabled = false;
+    }, 2000);
+
+    alert('บันทึกขึ้น Firebase สำเร็จ\nข้อมูลจะ sync ไปยังทุก browser ทันที');
+  } catch(e) {
+    console.error('Firebase write error:', e);
+    setFBStatus('offline', 'บันทึกไม่ได้');
+    btn.innerHTML = '<span>❌</span> บันทึกไม่สำเร็จ';
+    setTimeout(() => {
+      btn.innerHTML = '<span>☁️</span> บันทึกขึ้น Firebase';
+      btn.disabled = false;
+    }, 3000);
+    alert('บันทึกไม่สำเร็จ: ' + e.message + '\n\nวิธีแก้:\n1. ตรวจสอบ Firebase Rules ให้อนุญาต write\n2. ใส่ apiKey ใน firebaseConfig');
+  }
+}
+
+// ── READ from Firebase on page load (if no Google Sheet) ─────────────
+async function loadFromFirebase() {
+  if (!fbDb) { alert('Firebase ยังไม่พร้อม'); return; }
+  setFBStatus('saving', 'กำลังโหลด...');
+  try {
+    const snap = await fbDb.ref('election').get();
+    const data = snap.val();
+    if (!data) { alert('ยังไม่มีข้อมูลใน Firebase\nกรุณาบันทึกข้อมูลจาก CMS ก่อน'); return; }
+
+    if (data.candidates) {
+      const arr = Array.isArray(data.candidates) ? data.candidates : Object.values(data.candidates);
+      cands = arr.sort((a,b) => b.votes - a.votes);
+    }
+    if (data.districts) districtData = Array.isArray(data.districts) ? data.districts : Object.values(data.districts);
+    if (data.skg) skgData = data.skg;
+
+    document.getElementById('foot-src').textContent = 'Firebase';
+    setFBStatus('connected', 'โหลดแล้ว ✓');
+    simStep = 60;
+    renderDash(mockData());
+    if (Object.keys(skgData).length) renderSKGOverview();
+    alert('โหลดจาก Firebase สำเร็จ ' + cands.length + ' ผู้สมัคร');
+  } catch(e) {
+    setFBStatus('offline', 'โหลดไม่ได้');
+    alert('โหลดไม่สำเร็จ: ' + e.message);
+  }
+}
+
 // ── INIT ────────────────────────────────────────────────────
 buildCP();
 startSim();
 // Auto-show app (no auth)
 document.getElementById('user-av').textContent = '👤';
 document.getElementById('user-name').textContent = 'ผู้ใช้';
+// Init Firebase
+initFirebase();
 
 // ── CANDIDATE DETAIL ──────────────────────────────────────────────
 function openCandDetail(idx) {
