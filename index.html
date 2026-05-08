@@ -1484,7 +1484,16 @@ async function initFirebase() {
     if (typeof __firebase_config !== 'undefined' && __firebase_config) {
       config = JSON.parse(__firebase_config);
     } else {
-      config = { projectId: "bkk-election-vote" };
+      config = {
+  apiKey: "AIzaSyBZrGgrbCSycCe46TZyXtG1boJMYWcAN-o",
+  authDomain: "bkk-election-vote.firebaseapp.com",
+  databaseURL: "https://bkk-election-vote-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bkk-election-vote",
+  storageBucket: "bkk-election-vote.firebasestorage.app",
+  messagingSenderId: "1020264986175",
+  appId: "1:1020264986175:web:3ee5c3cd1d93f16c882a8a",
+  
+      };
     }
     
     firebase.initializeApp(config);
@@ -1607,7 +1616,6 @@ async function saveToFirebase(silent = false) {
 
 // ── INIT ──────────────────────────────────────────────────────
 buildCP();
-
   startSim();
 // Auto-switch to Firebase mode
 setMode('firebase', document.querySelector(".st[onclick*='firebase']"));
