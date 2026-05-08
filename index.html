@@ -163,6 +163,45 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .wc-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:8px;overflow:hidden}
 .wc-bar-f{height:100%;background:var(--g);border-radius:1px;transition:width .8s ease}
 
+/* ── CANDIDATE LIST ROW (ย้ายขึ้นมาบนสุด) ── */
+.bottom-row{margin-bottom:14px}
+.cands-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden}
+.cands-card-hd{
+  padding:10px 20px;border-bottom:1px solid var(--line2);
+  display:flex;align-items:center;gap:12px;background:var(--bg1)
+}
+.cands-card-title{font-size:11px;font-weight:700;color:var(--t1)}
+.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0;border-top:none}
+/* candidate item */
+.ci{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;cursor:pointer;
+  border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  transition:background .12s;position:relative;overflow:hidden
+}
+.ci::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  transition:opacity .15s;opacity:0
+}
+.ci:hover{background:var(--bg3)}
+.ci:hover::before{opacity:1}
+.ci-rank{font-size:12px;font-weight:700;color:var(--t4);width:18px;text-align:right;flex-shrink:0}
+.ci-av{
+  width:40px;height:40px;border-radius:50%;overflow:hidden;
+  border:1.5px solid var(--line);background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0
+}
+.ci-av.r1{width:48px;height:48px;border-color:var(--g);box-shadow:0 0 12px rgba(0,200,150,.2)}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.ci-party{font-size:10px;color:var(--t3);margin-top:1px}
+.ci-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:5px;overflow:hidden}
+.ci-bar-f{height:100%;border-radius:1px;transition:width .8s ease}
+.ci-score{text-align:right;flex-shrink:0;min-width:64px}
+.ci-votes{font-size:11px;font-weight:700;color:var(--t1)}
+.ci-pct{font-size:10px;color:var(--t3);margin-top:1px}
+.ci-medal{font-size:14px;flex-shrink:0}
+
 /* ── MIDDLE ROW — district map + chart ── */
 .middle-row{
   display:grid;
@@ -231,45 +270,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .sheet-panel{display:none;margin-top:8px}
 .sheet-row{display:grid;grid-template-columns:54px 1fr;gap:5px;align-items:center;margin-bottom:5px}
 .sheet-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t4)}
-
-/* ── BOTTOM ROW — candidate list ── */
-.bottom-row{margin-bottom:20px}
-.cands-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden}
-.cands-card-hd{
-  padding:10px 20px;border-bottom:1px solid var(--line2);
-  display:flex;align-items:center;gap:12px;background:var(--bg1)
-}
-.cands-card-title{font-size:11px;font-weight:700;color:var(--t1)}
-.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0;border-top:none}
-/* candidate item */
-.ci{
-  display:flex;align-items:center;gap:10px;
-  padding:12px 20px;cursor:pointer;
-  border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
-  transition:background .12s;position:relative;overflow:hidden
-}
-.ci::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  transition:opacity .15s;opacity:0
-}
-.ci:hover{background:var(--bg3)}
-.ci:hover::before{opacity:1}
-.ci-rank{font-size:12px;font-weight:700;color:var(--t4);width:18px;text-align:right;flex-shrink:0}
-.ci-av{
-  width:40px;height:40px;border-radius:50%;overflow:hidden;
-  border:1.5px solid var(--line);background:var(--bg4);
-  display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0
-}
-.ci-av.r1{width:48px;height:48px;border-color:var(--g);box-shadow:0 0 12px rgba(0,200,150,.2)}
-.ci-info{flex:1;min-width:0}
-.ci-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
-.ci-party{font-size:10px;color:var(--t3);margin-top:1px}
-.ci-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:5px;overflow:hidden}
-.ci-bar-f{height:100%;border-radius:1px;transition:width .8s ease}
-.ci-score{text-align:right;flex-shrink:0;min-width:64px}
-.ci-votes{font-size:11px;font-weight:700;color:var(--t1)}
-.ci-pct{font-size:10px;color:var(--t3);margin-top:1px}
-.ci-medal{font-size:14px;flex-shrink:0}
 
 /* ── DETAIL PANEL overlay ── */
 .detail-overlay{
@@ -733,7 +733,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
           <div style="font-size:11px;color:var(--t3)">เพิ่ม แก้ไข ลบ จัดเรียง</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn-s" onclick="resetCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M3 12a9 9 0 101 4.7"/><polyline points="3 3 3 9 9 9"/></svg> รีเซ็ต</button>
-            <button class="btn-p" onclick="saveCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> นำไปใช้ (และบันทึก)</button>
+            <button class="btn-p" onclick="saveCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> นำไปใช้</button>
             <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> บังคับเซฟขึ้น Cloud</button>
           </div>
         </div>
@@ -753,7 +753,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
       <div id="cms-firebase" style="display:none">
         <div style="background:var(--bg3);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px">
           <div style="font-size:11px;font-weight:700;color:var(--t1);margin-bottom:6px">Firestore Cloud Database</div>
-          <div style="font-size:10px;color:var(--t3);margin-bottom:10px">ข้อมูลจะถูกเชื่อมต่อและจัดเก็บผ่าน Cloud อัตโนมัติ (Auto-Save) เพื่อป้องกันข้อมูลสูญหายเมื่อรีเฟรชหน้าเว็บ</div>
+          <div style="font-size:10px;color:var(--amber);margin-bottom:10px">กรุณากดปุ่มบันทึกขึ้น Cloud ด้วยตัวเองทุกครั้งที่มีการอัปเดต เพื่อป้องกันข้อมูลสูญหายเมื่อรีเฟรชหน้าเว็บ</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn2" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> บังคับบันทึกขึ้น Cloud</button>
             <button class="btn-s" onclick="loadFromFirebase()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> โหลดจาก Cloud ใหม่</button>
@@ -1256,7 +1256,6 @@ async function loadFromCSVUrl(csvUrl,lbl){
     document.getElementById('live-txt').textContent='โหลดแล้ว';
     simStep=60;renderDash(mockData());
     showToast('โหลดข้อมูลผู้สมัครสำเร็จ (' + cands.length + ' คน)');
-    autoSave(); // SAVE TO CLOUD
   }catch(e){showToast('โหลดไม่สำเร็จ: '+e.message, 'error');document.getElementById('live-txt').textContent='Error';}
 }
 async function loadGSheetURL(){
@@ -1274,7 +1273,6 @@ async function loadGSheetURL(){
     document.getElementById('sheet-panel-toggle').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>';
     const parts=['ผู้สมัคร'];if(distUrl)parts.push('เขต');if(skgUrl)parts.push('สก.');
     if(statusEl){statusEl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> '+parts.join('+');statusEl.style.color='var(--g)';}
-    autoSave(); // SAVE TO CLOUD
   }catch(e){if(statusEl){statusEl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> '+e.message.slice(0,40);statusEl.style.color='var(--red)';}}
 }
 async function loadDistrictSheet(url){
@@ -1372,7 +1370,7 @@ function upd(i,k,v){cands[i][k]=v;}
 function addCand(){cands.push({id:Date.now(),no:'',name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
 function delCand(i){if(cands.length<=1)return;cands.splice(i,1);renderTable();}
 function resetCands(){if(!confirm('รีเซ็ต?'))return;cands=JSON.parse(JSON.stringify(DEF));renderTable();}
-function saveCands(){closeCMS();startSim();autoSave();} // SAVE TO CLOUD
+function saveCands(){closeCMS();startSim();}
 let dragI=null;
 function ds(e,i){dragI=i;}function dov(e){e.preventDefault();}
 function dpr(e,i){e.preventDefault();if(dragI===null||dragI===i)return;const m=cands.splice(dragI,1)[0];cands.splice(i,0,m);dragI=null;renderTable();}
@@ -1421,7 +1419,7 @@ function logoFile(f){if(f.size>5*1024*1024)return;const r=new FileReader();r.onl
 document.getElementById('logo-modal').addEventListener('click',e=>{if(e.target===document.getElementById('logo-modal'))closeLogoModal();});
 
 // ── IMPORT/EXPORT ─────────────────────────────────────────────
-function importJSON(){try{const a=JSON.parse(document.getElementById('imp-json').value.trim());if(!Array.isArray(a))throw 0;cands=a.map((c,i)=>({id:c.id||i+1,no:c.no||'',name:c.name||'ผู้สมัคร'+(i+1),party:c.party||'อิสระ',votes:parseInt(c.votes)||0,color:c.color||PRESET[i%PRESET.length],avatar:c.avatar||'',partyLogo:c.partyLogo||''}));showToast('นำเข้าสำเร็จ '+cands.length+' คน');updateExpPreview();autoSave();}catch{showToast('JSON ไม่ถูกต้อง', 'error');}}
+function importJSON(){try{const a=JSON.parse(document.getElementById('imp-json').value.trim());if(!Array.isArray(a))throw 0;cands=a.map((c,i)=>({id:c.id||i+1,no:c.no||'',name:c.name||'ผู้สมัคร'+(i+1),party:c.party||'อิสระ',votes:parseInt(c.votes)||0,color:c.color||PRESET[i%PRESET.length],avatar:c.avatar||'',partyLogo:c.partyLogo||''}));showToast('นำเข้าสำเร็จ '+cands.length+' คน');updateExpPreview();}catch{showToast('JSON ไม่ถูกต้อง', 'error');}}
 function readFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{if(f.name.endsWith('.json')){document.getElementById('imp-json').value=e.target.result;importJSON();}};r.readAsText(f);}
 async function pasteClip(){try{document.getElementById('imp-json').value=await navigator.clipboard.readText();}catch{showToast('ไม่สามารถอ่าน Clipboard', 'error');}}
 function exportJSON(){const b=new Blob([JSON.stringify(cands,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.json';a.click();}
@@ -1605,11 +1603,6 @@ async function saveToFirebase(silent = false) {
        btns.forEach(b=>{b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว';setTimeout(()=>{b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync';b.disabled=false;},3000);});
     }
   }
-}
-
-// Helper to save quietly in the background
-function autoSave() {
-  if (fbConnected) saveToFirebase(true);
 }
 
 // ── INIT ──────────────────────────────────────────────────────
