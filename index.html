@@ -262,7 +262,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 }
 .ci-av.r1{width:48px;height:48px;border-color:var(--g);box-shadow:0 0 12px rgba(0,200,150,.2)}
 .ci-info{flex:1;min-width:0}
-.ci-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
 .ci-party{font-size:10px;color:var(--t3);margin-top:1px}
 .ci-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:5px;overflow:hidden}
 .ci-bar-f{height:100%;border-radius:1px;transition:width .8s ease}
@@ -295,7 +295,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .dd-row:last-child{border-bottom:none}
 .dd-av{width:22px;height:22px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
 .dd-bar-wrap{flex:1;min-width:0}
-.dd-name{font-size:11px;color:var(--t1);font-weight:500}
+.dd-name{font-size:11px;color:var(--t1);font-weight:500;display:flex;align-items:center;gap:4px}
 .dd-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:3px;overflow:hidden}
 .dd-bar-f{height:100%;border-radius:1px}
 .dd-score{text-align:right;min-width:58px;flex-shrink:0}
@@ -309,7 +309,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .skg-row:last-child{border-bottom:none}
 .skg-av{width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
 .skg-info{flex:1;min-width:0}
-.skg-name{font-size:11px;color:var(--t1)}
+.skg-name{font-size:11px;color:var(--t1);display:flex;align-items:center;gap:4px}
 .skg-party{font-size:9px;color:var(--t4)}
 .skg-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:2px;overflow:hidden}
 .skg-bar-f{height:100%;border-radius:1px}
@@ -386,7 +386,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .cd-hero-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
 .cd-av{width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
 .cd-rank{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;margin-bottom:5px}
-.cd-name{font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2}
+.cd-name{font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;display:flex;align-items:center;gap:6px}
 .cd-party{font-size:11px;color:var(--t3);margin-top:3px}
 .cd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
 .cd-stat{background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r-sm);padding:10px;text-align:center}
@@ -395,7 +395,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .cd-bar-section{margin-bottom:12px}
 .cd-bar-lbl{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
 .cd-bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.cd-bar-label{font-size:11px;color:var(--t2);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-bar-label{font-size:11px;color:var(--t2);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
 .cd-bar-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
 .cd-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
 .cd-bar-pct{font-size:10px;font-weight:500;color:var(--t2);width:32px;text-align:right;flex-shrink:0}
@@ -429,8 +429,33 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .skg-mini-tag{font-size:10px;color:var(--g)}
 .skg-mini-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .skg-mini-av{width:16px;height:16px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
-.skg-mini-cand{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skg-mini-cand{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:4px}
 .skg-mini-score{font-size:11px;font-weight:600;color:var(--t1);margin-left:auto}
+
+/* ── TOAST NOTIFICATION ── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--g);
+  color: var(--t1);
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh3);
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast.show { transform: translateX(0); }
+.toast.error { border-left-color: var(--red); }
+.toast.saving { border-left-color: var(--amber); }
 
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
@@ -461,6 +486,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
   .right-col{grid-template-columns:1fr}
   .middle-row{grid-template-columns:1fr}
   .import-page{padding:14px 12px}
+  .toast { bottom: 10px; right: 10px; left: 10px; border-radius: var(--r); }
 }
 @media(max-width:400px){
   .hero-row{gap:6px}
@@ -551,6 +577,17 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
     </div>
   </div>
 
+  <!-- CANDIDATE LIST ROW (ย้ายขึ้นมาบนสุด) -->
+  <div class="bottom-row" style="margin-bottom:14px">
+    <div class="cands-card">
+      <div class="cands-card-hd">
+        <div class="cands-card-title">ผลคะแนนผู้สมัคร</div>
+        <span id="foot-time" style="font-size:10px;color:var(--t4)">—</span>
+      </div>
+      <div class="cands-grid" id="cand-list"></div>
+    </div>
+  </div>
+
   <!-- MIDDLE ROW -->
   <div class="middle-row">
     <!-- MAP -->
@@ -563,8 +600,8 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
         <div style="display:flex;align-items:center;gap:8px">
           <span id="foot-src" style="font-size:10px;color:var(--t4)">Cloud Sync</span>
           <span id="upd-tag" style="font-size:10px;color:var(--t4)">—</span>
-          <button class="btn-s" onclick="refresh()" style="font-size:10px;padding:3px 8px" title="รีเฟรชข้อมูล">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <button class="btn-s" onclick="refresh()" style="font-size:10px;padding:3px 8px;display:flex;align-items:center;color:var(--t3)" title="รีเฟรชข้อมูล">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
               <path d="M21 3v5h-5"></path>
             </svg>
@@ -604,7 +641,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
               <div class="sheet-row"><span class="sheet-lbl">ผู้สมัคร</span><input class="inp" id="gs-url" placeholder="#gid=0"></div>
               <div class="sheet-row"><span class="sheet-lbl">เขต</span><input class="inp" id="gs-dist-url" placeholder="#gid=..."></div>
               <div class="sheet-row"><span class="sheet-lbl">สก.</span><input class="inp" id="gs-skg-url" placeholder="#gid=..."></div>
-              <div class="hint">คลิก tab Sheet → URL มี <code>#gid=</code></div>
+              <div class="hint">ชีตผู้สมัครและสก.: ให้เพิ่มคอลัมน์ชื่อ <strong style="color:var(--t1)">"เบอร์"</strong> ไว้คอลัมน์แรกสุด</div>
             </div>
           </div>
           <div id="pm-firebase">
@@ -621,17 +658,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM — CANDIDATE LIST -->
-  <div class="bottom-row">
-    <div class="cands-card">
-      <div class="cands-card-hd">
-        <div class="cands-card-title">ผลคะแนนผู้สมัคร</div>
-        <span id="foot-time" style="font-size:10px;color:var(--t4)">—</span>
-      </div>
-      <div class="cands-grid" id="cand-list"></div>
     </div>
   </div>
 
@@ -675,7 +701,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
     <div class="imp-card-title">Google Sheets</div>
     <input class="inp" id="gs-url2" placeholder="Share Link" style="margin-bottom:6px">
     <button class="btn-p" onclick="loadGSheetURL2()">โหลด</button>
-    <div class="hint" style="margin-top:4px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</div>
+    <div class="hint" style="margin-top:4px">No(เบอร์), Name, Party, Votes, Color, AvatarURL, PartyLogoURL</div>
   </div>
 </div>
 </div>
@@ -708,13 +734,13 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn-s" onclick="resetCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M3 12a9 9 0 101 4.7"/><polyline points="3 3 3 9 9 9"/></svg> รีเซ็ต</button>
             <button class="btn-p" onclick="saveCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> นำไปใช้ (และบันทึก)</button>
-            <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync</button>
+            <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> บังคับเซฟขึ้น Cloud</button>
           </div>
         </div>
         <div style="overflow-x:auto">
           <table class="ct">
             <thead><tr>
-              <th></th><th>#</th><th style="width:60px">รูป</th><th>ชื่อ</th>
+              <th></th><th>#</th><th style="width:40px;text-align:center">เบอร์</th><th style="width:60px">รูป</th><th>ชื่อ</th>
               <th style="width:60px">โลโก้</th><th>สังกัด</th>
               <th style="width:80px">คะแนน</th>
               <th style="width:28px">สี</th><th></th>
@@ -730,7 +756,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
           <div style="font-size:10px;color:var(--t3);margin-bottom:10px">ข้อมูลจะถูกเชื่อมต่อและจัดเก็บผ่าน Cloud อัตโนมัติ (Auto-Save) เพื่อป้องกันข้อมูลสูญหายเมื่อรีเฟรชหน้าเว็บ</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn2" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> บังคับบันทึกขึ้น Cloud</button>
-            <button class="btn-s" onclick="loadFromFirebase()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> โหลดจาก Cloud</button>
+            <button class="btn-s" onclick="loadFromFirebase()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> โหลดจาก Cloud ใหม่</button>
           </div>
         </div>
       </div>
@@ -819,8 +845,34 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
   </div>
 </div>
 
+<!-- ════ TOAST NOTIFICATION ════ -->
+<div id="toast" class="toast"><span id="toast-icon">✓</span> <span id="toast-msg">บันทึกข้อมูลสำเร็จ</span></div>
+
 <script>
-// ── UI ────────────────────────────────────────────────────────
+// ── UI & TOAST ────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  const tMsg = document.getElementById('toast-msg');
+  const tIcn = document.getElementById('toast-icon');
+  t.className = 'toast ' + type;
+  tMsg.textContent = msg;
+  
+  if (type === 'success') {
+    tIcn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  } else if (type === 'error') {
+    tIcn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  } else if (type === 'saving') {
+    tIcn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round" class="spin"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2"/></svg>';
+  }
+
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  if (type !== 'saving') {
+    toastTimeout = setTimeout(() => { t.classList.remove('show'); }, 3000);
+  }
+}
+
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tb-nav-btn,.drawer-tab').forEach(b=>b.classList.remove('on'));
@@ -855,11 +907,11 @@ function toggleUserMenu(){}function signOut(){}
 // ── DATA ──────────────────────────────────────────────────────
 const BKK_DISTRICTS=["พระนคร","ดุสิต","หนองจอก","บางรัก","บางเขน","บางกอกน้อย","บางกอกใหญ่","ห้วยขวาง","พระโขนง","มีนบุรี","ลาดกระบัง","ยานนาวา","สัมพันธวงศ์","จอมทอง","บึงกุ่ม","สาทร","บางซื่อ","จตุจักร","ลาดพร้าว","ดอนเมือง","ราษฎร์บูรณะ","หลักสี่","วังทองหลาง","คลองสาน","สวนหลวง","ตลิ่งชัน","บางพลัด","บึงกุ่ม","ปทุมวัน","ป้อมปราบ","พระสมุทรเจดีย์","มีนบุรี","ลาดกระบัง","คันนายาว","สะพานสูง","คลองเตย","วัฒนา","บางนา","ทวีวัฒนา","ทุ่งครุ","บางบอน","ราษฎร์บูรณะ","หลักสี่","ลาดพร้าว","ประเวศ","บางแค","ภาษีเจริญ","หนองแขม","ดอนเมือง","หนองจอก"];
 const DEF=[
-  {id:1,name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",         votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
-  {id:2,name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
-  {id:3,name:"วิโรจน์ ลักขณาอดิศร",    party:"ก้าวไกล",         votes:247606, color:"#ffcc00",avatar:"",partyLogo:""},
-  {id:4,name:"อัศวิน ขวัญเมือง",       party:"อิสระ (ราชการ)", votes:207740, color:"#8b949e",avatar:"",partyLogo:""},
-  {id:5,name:"รสนา โตสิตระกูล",         party:"อิสระ",         votes:72541,  color:"#c084fc",avatar:"",partyLogo:""},
+  {id:1,no:"8",name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",         votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
+  {id:2,no:"4",name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
+  {id:3,no:"1",name:"วิโรจน์ ลักขณาอดิศร",    party:"ก้าวไกล",         votes:247606, color:"#ffcc00",avatar:"",partyLogo:""},
+  {id:4,no:"6",name:"อัศวิน ขวัญเมือง",       party:"อิสระ (ราชการ)", votes:207740, color:"#8b949e",avatar:"",partyLogo:""},
+  {id:5,no:"7",name:"รสนา โตสิตระกูล",         party:"อิสระ",         votes:72541,  color:"#c084fc",avatar:"",partyLogo:""},
 ];
 const PRESET=["#00c896","#4d9fff","#ffcc00","#ff6b6b","#c084fc","#fb923c","#34d399","#60a5fa","#fbbf24","#f87171","#a78bfa","#2dd4bf"];
 const EMOJI_FB=[]; // SVG avatars used instead
@@ -960,7 +1012,11 @@ function renderDash(d){
     const aw=f('w-avatar-wrap');
     if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',72)">`;
     else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',72);
-    f('w-name').textContent=w.name;
+    
+    // ใส่เบอร์ผู้นำ (ถ้ามี)
+    const noBadge = w.no ? `<span style="font-size:10px;background:rgba(255,255,255,0.1);padding:2px 5px;border-radius:4px;margin-right:6px">เบอร์ ${w.no}</span>` : '';
+    f('w-name').innerHTML= noBadge + w.name;
+    
     f('w-party-wrap').textContent=w.party;
     f('w-votes').textContent=w.votes.toLocaleString()+' คะแนน';
     f('w-pct').textContent=(tv?(w.votes/tv*100).toFixed(1):0)+'%';
@@ -981,13 +1037,17 @@ const medals = MEDAL_SVG;
     const avSize=isFirst?48:40;
     const avCls='ci-av'+(isFirst?' r1':'');
     const av=c.avatar?`<div class="${avCls}"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','${avCls}',${avSize})"></div>`:svgAvHtml(c.name,c.color,avCls,avSize);
+    
+    // ใส่เบอร์ลงในรายชื่อผู้สมัคร
+    const noBadge = c.no ? `<span style="background:var(--bg3);border:1px solid var(--line);padding:1px 4px;border-radius:3px;font-size:9px;margin-right:4px;color:var(--t3)">เบอร์ ${c.no}</span>` : '';
+    
     return `<div class="ci" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s">
       <div class="ci::before" style="background:${c.color}"></div>
       <style>.ci:nth-child(${i+1})::before{background:${c.color}}</style>
       <div class="ci-rank" style="color:${isFirst?c.color:'var(--t4)'}">${i+1}</div>
       ${av}
       <div class="ci-info">
-        <div class="ci-name" style="color:${isFirst?c.color:'var(--t1)'}">${c.name}</div>
+        <div class="ci-name" style="color:${isFirst?c.color:'var(--t1)'}">${noBadge}${c.name}</div>
         <div class="ci-party">${c.party}</div>
         <div class="ci-bar"><div class="ci-bar-f" style="width:${bw.toFixed(1)}%;background:${c.color}"></div></div>
       </div>
@@ -1076,11 +1136,12 @@ function showDetailOverlay(dw,cs,i){
       const pct=dt?(c.dv/dt*100).toFixed(1):0;
       const bw=dc[0].dv?(c.dv/dc[0].dv*100).toFixed(1):0;
       const av=c.avatar?`<div class="dd-av"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','dd-av',22)"></div>`:svgAvHtml(c.name,c.color,'dd-av',22);
+      const noBadge = c.no ? `<span style="font-size:8px;background:var(--bg3);padding:1px 3px;border-radius:2px;margin-right:4px;color:var(--t3)">#${c.no}</span>` : '';
       return `<div class="dd-row">
         <span style="font-size:10px;min-width:18px;color:${idx===0?c.color:'var(--t4)'};font-weight:${idx===0?700:400}">${idx===0?'<svg width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\'><path d=\'M2 20h20M5 20V9l7-7 7 7v11\'/></svg>':idx+1}</span>
         ${av}
         <div class="dd-bar-wrap">
-          <div class="dd-name" style="color:${idx===0?c.color:'var(--t1)'}">${c.name.split(' ')[0]}</div>
+          <div class="dd-name" style="color:${idx===0?c.color:'var(--t1)'}">${noBadge}${c.name.split(' ')[0]}</div>
           <div class="dd-bar"><div class="dd-bar-f" style="width:${bw}%;background:${c.color}"></div></div>
         </div>
         <div class="dd-score"><div class="dd-votes">${c.dv.toLocaleString()}</div><div class="dd-pct">${pct}%</div></div>
@@ -1092,11 +1153,12 @@ function showDetailOverlay(dw,cs,i){
         const bw=(s.votes/maxSkg*100).toFixed(1);
         const col=s.color||PRESET[si%PRESET.length];
         const av=s.avatar?`<div class="skg-av"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${s.name}','${col}','skg-av',20)"></div>`:svgAvHtml(s.name,col,'skg-av',20);
+        const noBadge = s.no ? `<span style="font-size:8px;background:var(--bg3);padding:1px 3px;border-radius:2px;margin-right:4px;color:var(--t3)">#${s.no}</span>` : '';
         return `<div class="skg-row">
           <span style="font-size:9px;min-width:14px;color:${s.elected?col:'var(--t4)'}">${si+1}</span>
           ${av}
           <div class="skg-info">
-            <div class="skg-name" style="color:${s.elected?col:'var(--t1)'};font-weight:${s.elected?600:400}">${s.name}</div>
+            <div class="skg-name" style="color:${s.elected?col:'var(--t1)'};font-weight:${s.elected?600:400}">${noBadge}${s.name}</div>
             <div class="skg-party">${s.party}</div>
             <div class="skg-bar"><div class="skg-bar-f" style="width:${bw}%;background:${col}"></div></div>
           </div>
@@ -1129,7 +1191,8 @@ function renderSKGOverview(){
       ${cs.slice(0,3).map(s=>{ /* SHOW TOP 3 */
         const col=s.color||'#3d506a';
         const av=s.avatar?`<div class="skg-mini-av"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover"></div>`:svgAvHtml(s.name,col,'skg-mini-av',14);
-        return `<div class="skg-mini-row">${av}<span class="skg-mini-cand" style="color:${s.elected?col:'var(--t3)'}">${s.elected?'✓ ':''}${s.name.split(' ').slice(0,2).join(' ')}</span><span class="skg-mini-score">${s.votes.toLocaleString()}</span></div>`;
+        const noBadge = s.no ? `<span style="background:var(--bg4);padding:1px 3px;border-radius:2px;font-size:8px;margin-right:3px">#${s.no}</span>` : '';
+        return `<div class="skg-mini-row">${av}<span class="skg-mini-cand" style="color:${s.elected?col:'var(--t3)'}">${s.elected?'✓ ':''}${noBadge}${s.name.split(' ').slice(0,2).join(' ')}</span><span class="skg-mini-score">${s.votes.toLocaleString()}</span></div>`;
       }).join('')}
     </div>`;
   }).join('');
@@ -1164,8 +1227,11 @@ async function loadFromCSVUrl(csvUrl,lbl){
       if(cols.includes('name')||cols.includes('votes')||cols.includes('party')){headerIdx=i;break;}
     }
     const header=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
+    
+    // Check if the first column is a 'No' or 'เบอร์'
     const firstH=header[0].replace(/[^a-zก-ฮ]/g,'');
-    const off=(firstH==='no'||firstH==='num'||firstH===''||firstH==='ลำดับ'||firstH==='ที')?1:0;
+    const off=(firstH==='no'||firstH==='num'||firstH===''||firstH==='ลำดับ'||firstH==='ที'||firstH==='เบอร์')?1:0;
+    
     const rows=lines.slice(headerIdx+1).map(parseCSVLine).filter(r=>{
       const first=(r[0]||'').replace(/^"+|"+$/g,'').trim();
       if(!first) return false;
@@ -1176,6 +1242,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     });
     const parsed=rows.map((r,i)=>({
       id:i+1,
+      no: off ? (r[0]||'').replace(/^"+|"+$/g,'').trim() : '',
       name:(r[0+off]||'ผู้สมัคร '+(i+1)).replace(/^"+|"+$/g,'').trim(),
       party:(r[1+off]||'อิสระ').replace(/^"+|"+$/g,'').trim(),
       votes:parseInt((r[2+off]||'0').replace(/[^0-9]/g,''))||0,
@@ -1188,9 +1255,9 @@ async function loadFromCSVUrl(csvUrl,lbl){
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
     document.getElementById('live-txt').textContent='โหลดแล้ว';
     simStep=60;renderDash(mockData());
-    alert('โหลดสำเร็จ '+cands.length+' ผู้สมัคร');
+    showToast('โหลดข้อมูลผู้สมัครสำเร็จ (' + cands.length + ' คน)');
     autoSave(); // SAVE TO CLOUD
-  }catch(e){alert('โหลดไม่สำเร็จ:\n'+e.message);document.getElementById('live-txt').textContent='Error';}
+  }catch(e){showToast('โหลดไม่สำเร็จ: '+e.message, 'error');document.getElementById('live-txt').textContent='Error';}
 }
 async function loadGSheetURL(){
   const url=document.getElementById('gs-url').value.trim();
@@ -1239,9 +1306,9 @@ async function loadDistrictSheet(url){
       });
       return obj;
     }).filter(r=>r.district&&r.district.length<30);
-    alert('โหลดข้อมูลเขต '+districtData.length+' เขต');
+    showToast('โหลดข้อมูลเขตสำเร็จ (' + districtData.length + ' เขต)');
     simStep=60;renderDash(mockData());
-  }catch(e){alert('โหลดเขตไม่สำเร็จ: '+e.message);}
+  }catch(e){showToast('โหลดเขตไม่สำเร็จ: '+e.message, 'error');}
 }
 async function loadSKGSheet(url){
   try{
@@ -1263,21 +1330,23 @@ async function loadSKGSheet(url){
     }).forEach(r=>{
       const get=k=>{const i=hdr.indexOf(k);return i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';};
       const dist=get('district');if(!dist) return;
-      const entry={no:parseInt(get('no'))||0,name:get('name'),party:get('party')||'อิสระ',votes:parseInt(get('votes'))||0,elected:get('elected')==='1',color:get('color')||'',avatar:get('avatar_url')||get('avatar')||''};
+      
+      // ดึงค่า no เข้ามาในรูปแบบ String ทั่วไปเพื่อความปลอดภัย
+      const entry={no:get('no')||get('เบอร์')||'',name:get('name'),party:get('party')||'อิสระ',votes:parseInt(get('votes'))||0,elected:get('elected')==='1',color:get('color')||'',avatar:get('avatar_url')||get('avatar')||''};
       if(!entry.name) return;
       if(!skgData[dist]) skgData[dist]=[];
       skgData[dist].push(entry);
     });
     Object.keys(skgData).forEach(d=>skgData[d].sort((a,b)=>b.votes-a.votes));
-    alert('โหลด สก. สำเร็จ '+Object.keys(skgData).length+' เขต');
+    showToast('โหลดข้อมูล สก. สำเร็จ (' + Object.keys(skgData).length + ' เขต)');
     renderSKGOverview();
-  }catch(e){alert('โหลด สก. ไม่สำเร็จ: '+e.message);}
+  }catch(e){showToast('โหลด สก. ไม่สำเร็จ: '+e.message, 'error');}
 }
-async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){alert(e.message);}}
+async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){showToast(e.message, 'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
   clearInterval(simTimer);
-  try{const res=await fetch(url);const d=await res.json();if(!d.candidates) throw new Error('ไม่พบ candidates');cands=d.candidates.sort((a,b)=>b.votes-a.votes);simStep=60;renderDash(mockData());}catch(e){alert(e.message);}
+  try{const res=await fetch(url);const d=await res.json();if(!d.candidates) throw new Error('ไม่พบ candidates');cands=d.candidates.sort((a,b)=>b.votes-a.votes);simStep=60;renderDash(mockData());}catch(e){showToast(e.message, 'error');}
 }
 
 // ── CANDIDATE TABLE ───────────────────────────────────────────
@@ -1288,6 +1357,7 @@ function renderTable(){
     return `<tr>
       <td><span class="drag-h" draggable="true" ondragstart="ds(event,${i})" ondragover="dov(event)" ondrop="dpr(event,${i})">⋮⋮</span></td>
       <td style="color:var(--t4);font-size:10px;text-align:center">${i+1}</td>
+      <td><input class="ci-inp" value="${c.no||''}" placeholder="เบอร์" onchange="upd(${i},'no',this.value)" style="width:40px;text-align:center"></td>
       <td><div style="display:flex;align-items:center;gap:5px">${avEl}<div style="display:flex;flex-direction:column;gap:1px"><button style="font-size:8px;color:var(--g);background:none;border:none;cursor:pointer" onclick="openModal(${i},'avatar')">เปลี่ยน</button>${c.avatar?`<button style="font-size:8px;color:var(--red);background:none;border:none;cursor:pointer" onclick="cands[${i}].avatar='';renderTable()">ลบ</button>`:''}</div></div></td>
       <td><input class="ci-inp" value="${c.name}" onchange="upd(${i},'name',this.value)" style="min-width:110px"></td>
       <td><div style="display:flex;align-items:center;gap:4px">${logoEl}${c.partyLogo?`<button style="font-size:8px;color:var(--red);background:none;border:none;cursor:pointer" onclick="cands[${i}].partyLogo='';renderTable()">ลบ</button>`:''}</div></td>
@@ -1299,7 +1369,7 @@ function renderTable(){
   }).join('');
 }
 function upd(i,k,v){cands[i][k]=v;}
-function addCand(){cands.push({id:Date.now(),name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
+function addCand(){cands.push({id:Date.now(),no:'',name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
 function delCand(i){if(cands.length<=1)return;cands.splice(i,1);renderTable();}
 function resetCands(){if(!confirm('รีเซ็ต?'))return;cands=JSON.parse(JSON.stringify(DEF));renderTable();}
 function saveCands(){closeCMS();startSim();autoSave();} // SAVE TO CLOUD
@@ -1333,7 +1403,7 @@ function urlPreview(v){if(v.startsWith('http')){modalTempSrc=v;updateModalPrev(v
 function dzOver(e){e.preventDefault();}function dzLeave(){}
 function dzDrop(e){e.preventDefault();if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);}
 function fileChosen(inp){if(inp.files[0])processFile(inp.files[0]);}
-function processFile(file){if(file.size>5*1024*1024){alert('ไฟล์ใหญ่เกิน 5MB');return;}const r=new FileReader();r.onload=e=>{modalTempSrc=e.target.result;updateModalPrev(modalTempSrc);document.getElementById('img-url-input').value='(ไฟล์)';};r.readAsDataURL(file);}
+function processFile(file){if(file.size>5*1024*1024){showToast('ไฟล์ใหญ่เกิน 5MB', 'error');return;}const r=new FileReader();r.onload=e=>{modalTempSrc=e.target.result;updateModalPrev(modalTempSrc);document.getElementById('img-url-input').value='(ไฟล์)';};r.readAsDataURL(file);}
 document.getElementById('img-modal').addEventListener('click',e=>{if(e.target===document.getElementById('img-modal'))closeModal();});
 
 // ── LOGO ──────────────────────────────────────────────────────
@@ -1351,12 +1421,12 @@ function logoFile(f){if(f.size>5*1024*1024)return;const r=new FileReader();r.onl
 document.getElementById('logo-modal').addEventListener('click',e=>{if(e.target===document.getElementById('logo-modal'))closeLogoModal();});
 
 // ── IMPORT/EXPORT ─────────────────────────────────────────────
-function importJSON(){try{const a=JSON.parse(document.getElementById('imp-json').value.trim());if(!Array.isArray(a))throw 0;cands=a.map((c,i)=>({id:c.id||i+1,name:c.name||'ผู้สมัคร'+(i+1),party:c.party||'อิสระ',votes:parseInt(c.votes)||0,color:c.color||PRESET[i%PRESET.length],avatar:c.avatar||'',partyLogo:c.partyLogo||''}));alert('นำเข้าสำเร็จ '+cands.length+' คน');updateExpPreview();autoSave();}catch{alert('JSON ไม่ถูกต้อง');}}
+function importJSON(){try{const a=JSON.parse(document.getElementById('imp-json').value.trim());if(!Array.isArray(a))throw 0;cands=a.map((c,i)=>({id:c.id||i+1,no:c.no||'',name:c.name||'ผู้สมัคร'+(i+1),party:c.party||'อิสระ',votes:parseInt(c.votes)||0,color:c.color||PRESET[i%PRESET.length],avatar:c.avatar||'',partyLogo:c.partyLogo||''}));showToast('นำเข้าสำเร็จ '+cands.length+' คน');updateExpPreview();autoSave();}catch{showToast('JSON ไม่ถูกต้อง', 'error');}}
 function readFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{if(f.name.endsWith('.json')){document.getElementById('imp-json').value=e.target.result;importJSON();}};r.readAsText(f);}
-async function pasteClip(){try{document.getElementById('imp-json').value=await navigator.clipboard.readText();}catch{alert('ไม่สามารถอ่าน Clipboard');}}
+async function pasteClip(){try{document.getElementById('imp-json').value=await navigator.clipboard.readText();}catch{showToast('ไม่สามารถอ่าน Clipboard', 'error');}}
 function exportJSON(){const b=new Blob([JSON.stringify(cands,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.json';a.click();}
-function exportCSV(){const rows=[['name','party','votes','color','avatar','partyLogo'],...cands.map(c=>[c.name,c.party,c.votes,c.color,c.avatar,c.partyLogo])];const b=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.csv';a.click();}
-function copyJSON(){navigator.clipboard.writeText(JSON.stringify(cands,null,2)).then(()=>alert('คัดลอกแล้ว!')).catch(()=>alert('คัดลอกไม่ได้'));}
+function exportCSV(){const rows=[['no','name','party','votes','color','avatar','partyLogo'],...cands.map(c=>[c.no,c.name,c.party,c.votes,c.color,c.avatar,c.partyLogo])];const b=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.csv';a.click();}
+function copyJSON(){navigator.clipboard.writeText(JSON.stringify(cands,null,2)).then(()=>showToast('คัดลอก JSON แล้ว!')).catch(()=>showToast('คัดลอกไม่ได้', 'error'));}
 function updateExpPreview(){const el=document.getElementById('exp-prev');if(el)el.textContent=JSON.stringify(cands,null,2);}
 
 // ── CANDIDATE DETAIL ──────────────────────────────────────────
@@ -1378,11 +1448,13 @@ function openCandDetail(idx){
   avEl.style.borderColor=c.color+'55';
   
   const rankEl=document.getElementById('cd-rank');
-  rankEl.innerHTML=rankLabel; // FIXED: Changed from textContent to innerHTML
+  rankEl.innerHTML=rankLabel;
   rankEl.style.background=c.color+'18';
   rankEl.style.color=c.color;
   
-  document.getElementById('cd-name').textContent=c.name;
+  const noBadge = c.no ? `<span style="font-size:12px;background:var(--bg4);padding:2px 6px;border-radius:4px;margin-right:6px;vertical-align:middle;color:var(--t2)">เบอร์ ${c.no}</span>` : '';
+  document.getElementById('cd-name').innerHTML= noBadge + c.name;
+  
   document.getElementById('cd-modal-title').textContent=c.name;
   document.getElementById('cd-party-row').textContent=c.party;
   document.getElementById('cd-votes').textContent=c.votes>=1e6?(c.votes/1e6).toFixed(3)+'M':c.votes.toLocaleString();
@@ -1414,16 +1486,13 @@ async function initFirebase() {
     if (typeof __firebase_config !== 'undefined' && __firebase_config) {
       config = JSON.parse(__firebase_config);
     } else {
-      // Fallback config just in case
       config = { projectId: "bkk-election-vote" };
     }
     
-    // Initialize standard Firebase App
     firebase.initializeApp(config);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Perform Authentication
     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
       await auth.signInWithCustomToken(__initial_auth_token);
     } else {
@@ -1458,8 +1527,6 @@ function setFBStatus(state,text){
 function startRealtimeListener() {
   if (!fbConnected) return;
   const db = firebase.firestore();
-  
-  // Mandatory path for public Canvas data
   const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('election').doc('current');
 
   if (fbUnsubscribe) fbUnsubscribe();
@@ -1479,8 +1546,9 @@ function startRealtimeListener() {
     if (data.districtData) districtData = data.districtData;
     if (data.skgData) skgData = data.skgData;
 
+    const timeStr = new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     document.getElementById('foot-src').textContent = 'Cloud Sync';
-    setFBStatus('connected', 'อัปเดตล่าสุด');
+    setFBStatus('connected', 'Sync ล่าสุด ' + timeStr);
     
     // Refresh UI
     clearInterval(simTimer);
@@ -1495,14 +1563,14 @@ function startRealtimeListener() {
 
 async function saveToFirebase(silent = false) {
   if (!fbConnected) {
-     if (!silent) alert('ระบบ Cloud ยังไม่เชื่อมต่อ');
+     if (!silent) showToast('ระบบ Cloud ยังไม่เชื่อมต่อ', 'error');
      return;
   }
   
-  // Show saving indicator on global badge regardless of silent mode
   setFBStatus('saving','กำลัง Sync...');
-
+  
   if (!silent) {
+    showToast('กำลัง Sync ข้อมูล...', 'saving');
     const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
     btns.forEach(b=>{b.disabled=true;b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> บันทึก...';});
   }
@@ -1520,19 +1588,21 @@ async function saveToFirebase(silent = false) {
 
     const timeStr = new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     setFBStatus('connected', 'Sync ล่าสุด ' + timeStr);
+    
+    // แสดงแจ้งเตือนเสมอเมื่อเซฟสำเร็จ จะได้อุ่นใจ (แม้จะเป็น Auto Save)
+    showToast('อัปเดตข้อมูลขึ้น Cloud สำเร็จ', 'success');
 
     if (!silent) {
        const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
        btns.forEach(b=>{b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> บันทึกแล้ว';});
        setTimeout(()=>btns.forEach(b=>{b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync';b.disabled=false;}),2000);
-       alert('บันทึกขึ้น Cloud สำเร็จ! ข้อมูลจะไม่หายเมื่อรีเฟรชหน้า');
     }
   } catch(e) {
     setFBStatus('offline','Sync ล้มเหลว');
+    showToast('บันทึกล้มเหลว: ' + e.message, 'error');
     if (!silent) {
        const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
        btns.forEach(b=>{b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว';setTimeout(()=>{b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync';b.disabled=false;},3000);});
-       alert('ล้มเหลว: '+e.message);
     }
   }
 }
