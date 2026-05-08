@@ -563,7 +563,12 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
         <div style="display:flex;align-items:center;gap:8px">
           <span id="foot-src" style="font-size:10px;color:var(--t4)">Cloud Sync</span>
           <span id="upd-tag" style="font-size:10px;color:var(--t4)">—</span>
-          <button class="btn-s" onclick="refresh()" style="font-size:10px;padding:3px 8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 101 4.7"/><polyline points="3 3 3 9 9 9"/></svg></button>
+          <button class="btn-s" onclick="refresh()" style="font-size:10px;padding:3px 8px" title="รีเฟรชข้อมูล">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+              <path d="M21 3v5h-5"></path>
+            </svg>
+          </button>
         </div>
       </div>
       <div class="map-card-body">
@@ -1494,10 +1499,12 @@ async function saveToFirebase(silent = false) {
      return;
   }
   
+  // Show saving indicator on global badge regardless of silent mode
+  setFBStatus('saving','กำลัง Sync...');
+
   if (!silent) {
     const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
     btns.forEach(b=>{b.disabled=true;b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> บันทึก...';});
-    setFBStatus('saving','กำลัง save...');
   }
 
   try {
@@ -1511,16 +1518,18 @@ async function saveToFirebase(silent = false) {
       updatedAt: new Date().toISOString()
     });
 
+    const timeStr = new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    setFBStatus('connected', 'Sync ล่าสุด ' + timeStr);
+
     if (!silent) {
-       setFBStatus('connected','บันทึกแล้ว ✓');
        const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
        btns.forEach(b=>{b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> บันทึกแล้ว';});
        setTimeout(()=>btns.forEach(b=>{b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync';b.disabled=false;}),2000);
        alert('บันทึกขึ้น Cloud สำเร็จ! ข้อมูลจะไม่หายเมื่อรีเฟรชหน้า');
     }
   } catch(e) {
+    setFBStatus('offline','Sync ล้มเหลว');
     if (!silent) {
-       setFBStatus('offline','บันทึกไม่ได้');
        const btns = ['fb-save-btn','fb-save-btn2'].map(id=>document.getElementById(id)).filter(Boolean);
        btns.forEach(b=>{b.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว';setTimeout(()=>{b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Cloud Sync';b.disabled=false;},3000);});
        alert('ล้มเหลว: '+e.message);
