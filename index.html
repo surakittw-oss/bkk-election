@@ -941,16 +941,32 @@ function getRealData() {
   
   if (districtData && districtData.length > 0) {
     distWin = districtData.map(row => {
-       if (row.counted) counted++;
        const dv = cands.map(c => {
          let v = 0;
          if (c.no && row['votes_'+c.no] !== undefined) v = row['votes_'+c.no];
          else if (row['votes_'+c.id] !== undefined) v = row['votes_'+c.id];
+         else if (row._raw) {
+            const candNameFirst = c.name.split(' ')[0].toLowerCase();
+            const candNoStr = String(c.no).toLowerCase();
+            for(const [h, val] of Object.entries(row._raw)) {
+               const hk = h.toLowerCase();
+               if (hk.includes('district') || hk.includes('เขต') || hk.includes('counted') || hk.includes('นับ')) continue;
+               
+               if ((candNoStr && (hk === candNoStr || hk === `เบอร์ ${candNoStr}` || hk === `เบอร์${candNoStr}`)) || (hk.includes(candNameFirst) && candNameFirst.length > 2)) {
+                  v = parseInt(val) || 0;
+                  break;
+               }
+            }
+         }
          return { ...c, votes: v };
        });
+       
        const hasVotes = dv.some(c => c.votes > 0);
+       const isCounted = row.counted !== undefined ? row.counted : hasVotes;
+       if (isCounted) counted++;
+       
        const best = hasVotes ? dv.reduce((a,b) => b.votes > a.votes ? b : a, dv[0]) : null;
-       return { name: row.district, winner: best, counted: !!row.counted, distVotes: dv };
+       return { name: row.district, winner: best, counted: !!isCounted, distVotes: dv };
     });
   } else {
     distWin = BKK_DISTRICTS.map((name) => ({ name, winner: null, counted: false, distVotes: [] }));
@@ -1280,7 +1296,7 @@ function parseCSV(text) {
 }
 
 function findHeaderIndex(rows, requiredTokens) {
-  for(let i=0; i<Math.min(rows.length, 6); i++) {
+  for(let i=0; i<Math.min(rows.length, 10); i++) {
     const cols = rows[i].map(c=>(c||'').toLowerCase());
     const hasAll = requiredTokens.every(group => 
       cols.some(c => group.some(token => c.includes(token)))
@@ -1290,11 +1306,8 @@ function findHeaderIndex(rows, requiredTokens) {
   return 0; // fallback
 }
 
-async function loadFromCSVUrl(csvUrl,lbl){
-  clearInterval(simTimer);
-  document.getElementById('live-txt').textContent='กำลังโหลด...';
-  try{
-    const res=await fetch(csvUrl);
+async function loadMainSheet(csvUrl) {
+    const res=await fetch(sheetURLtoCSV(csvUrl));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
     if(text.includes('html') && text.includes('google.com')) throw new Error('Google Sheet น่าจะถูกปิดเป็น Private อยู่');
@@ -1335,64 +1348,30 @@ async function loadFromCSVUrl(csvUrl,lbl){
     
     if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์ "คะแนน" หรือ "votes"');
     cands=parsed;
-    document.getElementById('foot-src').textContent=lbl||'Google Sheets';
-    document.getElementById('live-txt').textContent='ล่าสุด';
-    simStep=60;renderDash(getRealData());
-    showToast('โหลดข้อมูลผู้ว่าฯ สำเร็จ (' + cands.length + ' คน)');
-  }catch(e){
-    document.getElementById('live-txt').textContent='Error';
-    throw e; // RETHROW 
-  }
-}
-
-async function loadGSheetURL(){
-  const url=document.getElementById('gs-url').value.trim();
-  const statusEl=document.getElementById('sheet-status');
-  if(!url){document.getElementById('sheet-panel').style.display='block';document.getElementById('gs-url').focus();return;}
-  if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin" style="margin-right:4px"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> กำลังโหลด...';statusEl.style.color='var(--t4)';}
-  
-  try{
-    await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
-    const distUrl=document.getElementById('gs-dist-url')?.value.trim();
-    if(distUrl) await loadDistrictSheet(distUrl);
-    const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
-    if(skgUrl) await loadSKGSheet(skgUrl);
-    
-    document.getElementById('sheet-panel').style.display='none';
-    document.getElementById('sheet-panel-toggle').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ปิดตั้งค่า';
-    const parts=['ผู้ว่าฯ'];if(distUrl)parts.push('เขต');if(skgUrl)parts.push('สก.');
-    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg> สำเร็จ ('+parts.join('+')+')';statusEl.style.color='var(--g)';}
-    
-    // Enable save buttons since new data arrived
-    ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
-    showToast('โหลดเสร็จแล้ว! อย่าลืมกด "บังคับเซฟขึ้น Cloud" เพื่ออัปเดตเว็บนะครับ', 'saving');
-  }catch(e){
-    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว กรุณาตรวจสอบลิงก์';statusEl.style.color='var(--red)';}
-    alert('โหลดข้อมูลล้มเหลว!\n\n1. โปรดตรวจสอบว่าคุณได้แชร์ลิงก์เป็น "ทุกคนที่มีลิงก์สามารถดูได้" แล้วหรือไม่ (Anyone with the link can view)\n2. ลองเปลี่ยนเป็น เผยแพร่ทางเว็บ (Publish to Web) แล้วนำลิงก์ CSV มาวาง\n\nError: ' + e.message);
-  }
 }
 
 async function loadDistrictSheet(url){
-  try{
     const res=await fetch(sheetURLtoCSV(url));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
     const rows = parseCSV(text);
     if(rows.length<2) return;
     
+    // Header doesn't have to perfectly say "district", we'll just pick the first row that looks like a header
     const reqTokens = [['district', 'เขต']];
     const distHdrIdx = findHeaderIndex(rows, reqTokens);
     const hdr = rows[distHdrIdx].map(h=>(h||'').toLowerCase().trim());
     
     districtData = rows.slice(distHdrIdx+1).filter(r=>{
       const first = (r[0]||'').trim();
-      if(!first||first.length>25||first.startsWith('รวม')) return false;
+      if(!first||first.length>35||first.startsWith('รวม')) return false;
       if(first === 'ชื่อเขต' || first.toLowerCase() === 'district') return false;
       return true;
     }).map(r=>{
-      const obj={};
+      const obj={ _raw: {} };
       hdr.forEach((h,i)=>{
         const val = (r[i]||'').replace(/,/g,'').trim();
+        obj._raw[h] = val; // Store everything for fuzzy match
         if(h.includes('district') || h.includes('เขต')) obj.district=val;
         else if(h.includes('counted') || h.includes('นับ')) obj.counted=val==='1'||val.toLowerCase()==='true'||val.includes('นับแล้ว');
         else if(h.startsWith('votes_') || h.startsWith('คะแนน') || h.includes('_') || /^\d+$/.test(h)) {
@@ -1400,17 +1379,13 @@ async function loadDistrictSheet(url){
            if(numMatch) obj['votes_'+numMatch[0]] = parseInt(val)||0;
         }
       });
+      // Fallback: If no column is strictly named "เขต", use the first column
+      obj.district = obj.district || r[0].trim();
       return obj;
-    }).filter(r=>r.district&&r.district.length<30);
-    
-    simStep=60;renderDash(getRealData());
-  }catch(e){
-    throw e;
-  }
+    }).filter(r=>r.district&&r.district.length<40);
 }
 
 async function loadSKGSheet(url){
-  try{
     const res=await fetch(sheetURLtoCSV(url));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
@@ -1424,7 +1399,7 @@ async function loadSKGSheet(url){
     skgData={};
     rows.slice(hdrIdx+1).filter(r=>{
       const f=(r[0]||'').trim();
-      if(!f || f.length>25 || f.startsWith('รวม')) return false;
+      if(!f || f.length>30 || f.startsWith('รวม')) return false;
       if(f === 'ชื่อเขต' || f.toLowerCase() === 'district') return false;
       return true;
     }).forEach(r=>{
@@ -1433,7 +1408,7 @@ async function loadSKGSheet(url){
          return match >= 0 ? (r[match] || '').trim() : '';
       };
       
-      const dist = get(['district', 'เขต']);
+      const dist = get(['district', 'เขต']) || r[0].trim(); // fallback to col 0
       if(!dist) return;
       
       const electedStr = get(['elected', 'ได้', 'สถานะ']).toLowerCase();
@@ -1453,13 +1428,71 @@ async function loadSKGSheet(url){
       skgData[dist].push(entry);
     });
     Object.keys(skgData).forEach(d=>skgData[d].sort((a,b)=>b.votes-a.votes));
-    renderSKGOverview();
-  }catch(e){
-    throw e;
-  }
 }
 
-async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){showToast(e.message, 'error');}}
+// ── THE MAIN SHEET LOADER ──
+async function loadGSheetURL() {
+  const url=document.getElementById('gs-url').value.trim();
+  const distUrl=document.getElementById('gs-dist-url')?.value.trim();
+  const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
+  
+  const statusEl=document.getElementById('sheet-status');
+  if(!url){document.getElementById('sheet-panel').style.display='block';document.getElementById('gs-url').focus();return;}
+  
+  clearInterval(simTimer);
+  document.getElementById('live-txt').textContent='กำลังโหลด...';
+  if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin" style="margin-right:4px"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> กำลังโหลด...';statusEl.style.color='var(--t4)';}
+  
+  let successCount = 0;
+  let parts = [];
+
+  try {
+    await loadMainSheet(url);
+    successCount++;
+    parts.push('ผู้ว่าฯ');
+  } catch(e) {
+    showToast('โหลดชีตผู้ว่าฯ ไม่สำเร็จ: ' + e.message, 'error');
+  }
+
+  if (distUrl) {
+    try {
+      await loadDistrictSheet(distUrl);
+      successCount++;
+      parts.push('เขต');
+    } catch(e) {
+      showToast('โหลดชีตคะแนนเขตไม่สำเร็จ', 'error');
+      console.error('District error:', e);
+    }
+  }
+
+  if (skgUrl) {
+    try {
+      await loadSKGSheet(skgUrl);
+      successCount++;
+      parts.push('สก.');
+    } catch(e) {
+      showToast('โหลดชีต สก. ไม่สำเร็จ', 'error');
+      console.error('SKG error:', e);
+    }
+  }
+
+  if (successCount > 0) {
+    document.getElementById('sheet-panel').style.display='none';
+    document.getElementById('sheet-panel-toggle').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ปิดตั้งค่า';
+    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg> โหลดสำเร็จ ('+parts.join(', ')+')';statusEl.style.color='var(--g)';}
+    
+    ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+    showToast('ดึงข้อมูลเสร็จสิ้น กด "บังคับเซฟขึ้น Cloud" เพื่ออัปเดต', 'saving');
+  } else {
+    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลวทั้งหมด';statusEl.style.color='var(--red)';}
+    document.getElementById('live-txt').textContent='Error';
+  }
+  
+  simStep=60;
+  renderDash(getRealData());
+}
+
+async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadMainSheet(url);showToast('โหลดเสร็จสิ้น');simStep=60;renderDash(getRealData());}catch(e){showToast(e.message, 'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
   clearInterval(simTimer);
@@ -1469,7 +1502,7 @@ async function loadAPI(){
 // ── CANDIDATE TABLE ───────────────────────────────────────────
 function renderTable(){
   document.getElementById('cand-tbody').innerHTML=cands.map((c,i)=>{
-    const avEl=c.avatar?`<div class="av-th" onclick="openModal(${i},'avatar')"><img src="${c.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',36)"></div>`:`<div class="av-th" onclick="openModal(${i},'avatar')">${svgAv(c.name,c.color,36)}</div>`;
+    const avEl=c.avatar?`<div class="av-th" onclick="openModal(${i},'avatar')"><img src="${c.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.innerHTML=svgAvHtml('${c.name}','${c.color}','',36)"></div>`:`<div class="av-th" onclick="openModal(${i},'avatar')">${svgAvHtml(c.name,c.color,'',36)}</div>`;
     const logoEl=c.partyLogo?`<div class="pt-th" onclick="openModal(${i},'partyLogo')"><img src="${c.partyLogo}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.innerHTML='+'"></div>`:`<div class="pt-th" onclick="openModal(${i},'partyLogo')">+</div>`;
     return `<tr>
       <td><span class="drag-h" draggable="true" ondragstart="ds(event,${i})" ondragover="dov(event)" ondrop="dpr(event,${i})">⋮⋮</span></td>
@@ -1565,8 +1598,8 @@ function openCandDetail(idx){
   const rankLabel=rankLabels[idx+1]||`อันดับ ${idx+1}`;
   document.getElementById('cd-hero-bar').style.background=c.color;
   const avEl=document.getElementById('cd-av');
-  if(c.avatar){avEl.innerHTML=`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',84)">`;}
-  else{avEl.innerHTML=svgAv(c.name,c.color,84);}
+  if(c.avatar){avEl.innerHTML=`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML=svgAvHtml('${c.name}','${c.color}','',84)">`;}
+  else{avEl.innerHTML=svgAvHtml(c.name,c.color,'',84);}
   avEl.style.borderColor=c.color+'66';
   
   const rankEl=document.getElementById('cd-rank');
