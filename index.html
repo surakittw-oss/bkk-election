@@ -163,7 +163,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .wc-bar{height:4px;background:var(--bg4);border-radius:2px;margin-top:12px;overflow:hidden}
 .wc-bar-f{height:100%;background:var(--g);border-radius:2px;transition:width .8s ease}
 
-/* ── CANDIDATE LIST ROW (Moved to top) ── */
+/* ── CANDIDATE LIST ROW ── */
 .bottom-row{margin-bottom:20px}
 .cands-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden}
 .cands-card-hd{
@@ -523,7 +523,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     <button class="tb-nav-btn" onclick="showPage('import',this)">นำเข้า</button>
     <button class="user-btn">
       <div class="uav" id="user-av">?</div>
-      <span id="user-name">ผู้ใช้</span>
+      <span id="user-name">ผู้ใช้ระบบ</span>
     </button>
     <button class="ham" onclick="openDrawer()"><span></span><span></span><span></span></button>
   </div>
@@ -637,7 +637,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
               <div class="sheet-row"><span class="sheet-lbl">ผู้ว่าฯ</span><input class="inp" id="gs-url" value="https://docs.google.com/spreadsheets/d/1abANACpNrqcd_Yv7S2qeTe2vdDkJZkoAgRgqQ-DWqcE/edit?gid=0#gid=0"></div>
               <div class="sheet-row"><span class="sheet-lbl">เขต</span><input class="inp" id="gs-dist-url" value="https://docs.google.com/spreadsheets/d/1abANACpNrqcd_Yv7S2qeTe2vdDkJZkoAgRgqQ-DWqcE/edit?gid=1704788302#gid=1704788302"></div>
               <div class="sheet-row"><span class="sheet-lbl">สก.</span><input class="inp" id="gs-skg-url" value="https://docs.google.com/spreadsheets/d/1abANACpNrqcd_Yv7S2qeTe2vdDkJZkoAgRgqQ-DWqcE/edit?gid=891915583#gid=891915583"></div>
-              <div class="hint">ระบบจับคู่ข้อมูลจากชื่อหัวคอลัมน์ (Header) อัตโนมัติ</div>
+              <div class="hint">ระบบจะจับคู่ข้อมูลจากชื่อหัวคอลัมน์อัตโนมัติ</div>
             </div>
           </div>
           <div id="pm-firebase" style="display:none">
@@ -895,7 +895,7 @@ function toggleSheetPanel(){
   const p=document.getElementById('sheet-panel');
   const b=document.getElementById('sheet-panel-toggle');
   const open=!p.style.display||p.style.display==='none';
-  p.style.display=open?'block':'none';b.innerHTML=open?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>';
+  p.style.display=open?'block':'none';b.innerHTML=open?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ปิดการตั้งค่า':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> ตั้งค่าลิงก์';
 }
 function closeDetail(){
   document.getElementById('detail-overlay').classList.remove('open');
@@ -929,35 +929,42 @@ function svgAvHtml(name,color,cls,size=32){return `<div class="${cls}" style="ov
 
 let cands=JSON.parse(JSON.stringify(DEF));
 let simTimer=null,simStep=22,chart=null;
-let colorTarget=null,mode='firebase',currentData=null,selectedDistrict=null;
+let colorTarget=null,mode='gsheet',currentData=null,selectedDistrict=null;
 let districtData=null,skgData={};
 let modalIdx=null,modalField=null,modalTempSrc=null;
 
-// ── DEFAULT MODE SETUP ──
-mode='gsheet'; // Set default mode to GSheet for easier management
-
-function setMode(m,btn){
-  mode=m;
-  document.querySelectorAll('.st').forEach(b=>b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
-  ['mock','gsheet','firebase','api'].forEach(k=>{
-    const el=document.getElementById('pm-'+k);
-    if(el) el.style.display=k===m?'':'none';
-  });
-  if(m==='mock'){
-    startSim();
+// ── GET REAL DATA OR MOCK DATA ────────────────────────────────
+function getRealData() {
+  const total = parseInt(document.getElementById('cfg-total')?.value) || 50;
+  let counted = 0;
+  let distWin = [];
+  
+  if (districtData && districtData.length > 0) {
+    distWin = districtData.map(row => {
+       if (row.counted) counted++;
+       const dv = cands.map(c => {
+         let v = 0;
+         if (c.no && row['votes_'+c.no] !== undefined) v = row['votes_'+c.no];
+         else if (row['votes_'+c.id] !== undefined) v = row['votes_'+c.id];
+         return { ...c, votes: v };
+       });
+       const hasVotes = dv.some(c => c.votes > 0);
+       const best = hasVotes ? dv.reduce((a,b) => b.votes > a.votes ? b : a, dv[0]) : null;
+       return { name: row.district, winner: best, counted: !!row.counted, distVotes: dv };
+    });
   } else {
-    clearInterval(simTimer);
-    if(m==='firebase' && fbConnected) {
-      startRealtimeListener();
-      document.getElementById('live-txt').textContent='Firebase';
-    } else {
-      document.getElementById('live-txt').textContent='หยุด';
-    }
+    distWin = BKK_DISTRICTS.map((name) => ({ name, winner: null, counted: false, distVotes: [] }));
   }
+  
+  return {
+    cands: [...cands].sort((a,b)=>b.votes-a.votes),
+    counted: counted || 0,
+    total: districtData && districtData.length > 0 ? districtData.length : total,
+    distWin,
+    updated: new Date()
+  };
 }
 
-// ── SIMULATION ────────────────────────────────────────────────
 function mockData(){
   const total=parseInt(document.getElementById('cfg-total')?.value)||50;
   const vr=document.getElementById('cfg-var')?.value||'mid';
@@ -981,6 +988,29 @@ function mockData(){
   }
   return{cands:sorted,counted,total,distWin,updated:new Date()};
 }
+
+// ── MODE & REFRESH ───────────────────────────────────────────
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.st').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  ['mock','gsheet','firebase','api'].forEach(k=>{
+    const el=document.getElementById('pm-'+k);
+    if(el) el.style.display=k===m?'':'none';
+  });
+  if(m==='mock'){
+    startSim();
+  } else {
+    clearInterval(simTimer);
+    if(m==='firebase' && fbConnected) {
+      startRealtimeListener();
+      document.getElementById('live-txt').textContent='Firebase';
+    } else {
+      document.getElementById('live-txt').textContent='หยุด';
+    }
+  }
+}
+
 function startSim(){
   clearInterval(simTimer);simStep=22;
   document.getElementById('live-txt').textContent='Live';
@@ -989,7 +1019,12 @@ function startSim(){
   function tick(){simStep++;renderDash(mockData());if(simStep>=60){clearInterval(simTimer);document.getElementById('live-txt').textContent='สิ้นสุด';}}
   tick();simTimer=setInterval(tick,speed);
 }
-function refresh(){if(mode==='mock')startSim();else if(mode==='gsheet')loadGSheetURL();else if(mode==='firebase')loadFromFirebase();else loadAPI();}
+function refresh(){
+  if(mode==='mock') startSim();
+  else if(mode==='gsheet') loadGSheetURL();
+  else if(mode==='firebase') loadFromFirebase();
+  else loadAPI();
+}
 
 // ── RENDER ────────────────────────────────────────────────────
 function renderDash(d){
@@ -1226,18 +1261,20 @@ function findHeaderIndex(lines, requiredTokens) {
 }
 
 async function loadFromCSVUrl(csvUrl,lbl){
-  clearInterval(simTimer);document.getElementById('live-txt').textContent='โหลด...';
+  clearInterval(simTimer);
+  document.getElementById('live-txt').textContent='กำลังโหลด...';
   try{
     const res=await fetch(csvUrl);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
-    const lines=text.trim().split('\n').filter(l=>l.trim());
-    if(lines.length<2) throw new Error('ไม่พบข้อมูล');
+    if(text.includes('html') && text.includes('google.com')) throw new Error('Google Sheet น่าจะถูกปิดเป็น Private อยู่');
     
-    const reqTokens = [['name', 'ชื่อ'], ['vote', 'คะแนน']];
+    const lines=text.trim().split('\n').filter(l=>l.trim());
+    if(lines.length<2) throw new Error('ไม่พบข้อมูลในไฟล์');
+    
+    const reqTokens = [['name', 'ชื่อ', 'ผู้สมัคร'], ['vote', 'คะแนน']];
     const headerIdx = findHeaderIndex(lines, reqTokens);
     
-    // ไม่ใช้ replace(/[^a-z]/g,'') เพื่อรักษาภาษาไทยไว้
     const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
     
     const getVal = (r, keyTokens) => {
@@ -1257,7 +1294,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const parsed=rows.map((r,i)=>({
       id:i+1,
       no: getVal(r, ['no', 'เบอร์', 'ลำดับ']),
-      name: getVal(r, ['name', 'ชื่อ']) || 'ผู้สมัคร '+(i+1),
+      name: getVal(r, ['name', 'ชื่อ', 'ผู้สมัคร']) || 'ผู้สมัคร '+(i+1),
       party: getVal(r, ['party', 'พรรค', 'สังกัด']) || 'อิสระ',
       votes: parseInt(getVal(r, ['vote', 'คะแนน']).replace(/[^0-9]/g,''))||0,
       color: getVal(r, ['color', 'สี', 'hex']) || PRESET[i%PRESET.length],
@@ -1265,13 +1302,43 @@ async function loadFromCSVUrl(csvUrl,lbl){
       partyLogo: getVal(r, ['logo', 'โลโก้']),
     })).filter(c=>c.name.length<50 && !isNaN(c.votes)).sort((a,b)=>b.votes-a.votes);
     
-    if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์คะแนน');
+    if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์ "คะแนน" หรือ "votes"');
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
-    document.getElementById('live-txt').textContent='โหลดแล้ว';
-    simStep=60;renderDash(mockData());
+    document.getElementById('live-txt').textContent='ล่าสุด';
+    simStep=60;renderDash(getRealData());
     showToast('โหลดข้อมูลผู้ว่าฯ สำเร็จ (' + cands.length + ' คน)');
-  }catch(e){showToast('โหลดไม่สำเร็จ: '+e.message, 'error');document.getElementById('live-txt').textContent='Error';}
+  }catch(e){
+    document.getElementById('live-txt').textContent='Error';
+    throw e; // RETHROW 
+  }
+}
+
+async function loadGSheetURL(){
+  const url=document.getElementById('gs-url').value.trim();
+  const statusEl=document.getElementById('sheet-status');
+  if(!url){document.getElementById('sheet-panel').style.display='block';document.getElementById('gs-url').focus();return;}
+  if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin" style="margin-right:4px"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> กำลังโหลด...';statusEl.style.color='var(--t4)';}
+  
+  try{
+    await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');
+    const distUrl=document.getElementById('gs-dist-url')?.value.trim();
+    if(distUrl) await loadDistrictSheet(distUrl);
+    const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
+    if(skgUrl) await loadSKGSheet(skgUrl);
+    
+    document.getElementById('sheet-panel').style.display='none';
+    document.getElementById('sheet-panel-toggle').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ปิดตั้งค่า';
+    const parts=['ผู้ว่าฯ'];if(distUrl)parts.push('เขต');if(skgUrl)parts.push('สก.');
+    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg> สำเร็จ ('+parts.join('+')+')';statusEl.style.color='var(--g)';}
+    
+    // Enable save buttons since new data arrived
+    ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+    showToast('โหลดเสร็จแล้ว! อย่าลืมกด "บังคับเซฟขึ้น Cloud" เพื่ออัปเดตเว็บนะครับ', 'saving');
+  }catch(e){
+    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว กรุณาตรวจสอบลิงก์';statusEl.style.color='var(--red)';}
+    alert('โหลดข้อมูลล้มเหลว!\n\n1. โปรดตรวจสอบว่าคุณได้แชร์ลิงก์เป็น "ทุกคนที่มีลิงก์สามารถดูได้" แล้วหรือไม่ (Anyone with the link can view)\n2. ลองเปลี่ยนเป็น เผยแพร่ทางเว็บ (Publish to Web) แล้วนำลิงก์ CSV มาวาง\n\nError: ' + e.message);
+  }
 }
 
 async function loadDistrictSheet(url){
@@ -1304,9 +1371,10 @@ async function loadDistrictSheet(url){
       return obj;
     }).filter(r=>r.district&&r.district.length<30);
     
-    showToast('โหลดข้อมูลคะแนนรายเขตสำเร็จ');
-    simStep=60;renderDash(mockData());
-  }catch(e){showToast('โหลดเขตไม่สำเร็จ: '+e.message, 'error');}
+    simStep=60;renderDash(getRealData());
+  }catch(e){
+    throw e;
+  }
 }
 
 async function loadSKGSheet(url){
@@ -1351,16 +1419,17 @@ async function loadSKGSheet(url){
       skgData[dist].push(entry);
     });
     Object.keys(skgData).forEach(d=>skgData[d].sort((a,b)=>b.votes-a.votes));
-    showToast('โหลดข้อมูล สก. สำเร็จ (' + Object.keys(skgData).length + ' เขต)');
     renderSKGOverview();
-  }catch(e){showToast('โหลด สก. ไม่สำเร็จ: '+e.message, 'error');}
+  }catch(e){
+    throw e;
+  }
 }
 
 async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){showToast(e.message, 'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
   clearInterval(simTimer);
-  try{const res=await fetch(url);const d=await res.json();if(!d.candidates) throw new Error('ไม่พบ candidates');cands=d.candidates.sort((a,b)=>b.votes-a.votes);simStep=60;renderDash(mockData());}catch(e){showToast(e.message, 'error');}
+  try{const res=await fetch(url);const d=await res.json();if(!d.candidates) throw new Error('ไม่พบ candidates');cands=d.candidates.sort((a,b)=>b.votes-a.votes);simStep=60;renderDash(getRealData());}catch(e){showToast(e.message, 'error');}
 }
 
 // ── CANDIDATE TABLE ───────────────────────────────────────────
@@ -1386,7 +1455,12 @@ function upd(i,k,v){cands[i][k]=v;}
 function addCand(){cands.push({id:Date.now(),no:'',name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
 function delCand(i){if(cands.length<=1)return;cands.splice(i,1);renderTable();}
 function resetCands(){if(!confirm('ยืนยันการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้น?'))return;cands=JSON.parse(JSON.stringify(DEF));renderTable();}
-function saveCands(){closeCMS();startSim();} 
+function saveCands(){
+  closeCMS();
+  startSim();
+  ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+  showToast('นำไปใช้แล้ว อย่าลืมบันทึกขึ้น Cloud', 'saving');
+} 
 let dragI=null;
 function ds(e,i){dragI=i;}function dov(e){e.preventDefault();}
 function dpr(e,i){e.preventDefault();if(dragI===null||dragI===i)return;const m=cands.splice(dragI,1)[0];cands.splice(i,0,m);dragI=null;renderTable();}
@@ -1574,7 +1648,7 @@ function startRealtimeListener() {
     // Refresh UI
     clearInterval(simTimer);
     simStep = 60;
-    renderDash(mockData());
+    renderDash(getRealData());
     if(Object.keys(skgData).length) renderSKGOverview();
   }, err => {
     console.warn(err.message);
