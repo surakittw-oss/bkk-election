@@ -381,6 +381,57 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .add-row{display:flex;align-items:center;gap:8px;padding:12px;color:var(--t2);cursor:pointer;font-size:14px;font-weight:600;border-top:1px solid var(--line);transition:color .15s;justify-content:center;margin-top:10px;background:var(--bg3);border-radius:8px}
 .add-row:hover{color:var(--g)}
 
+/* ── IMAGE / LOGO MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:700;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh3)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-title{font-size:16px;font-weight:800;color:var(--t1)}
+.modal-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:24px;transition:color 0.2s}
+.modal-close:hover{color:var(--t1)}
+.modal-prev{width:80px;height:80px;border-radius:50%;border:2px solid var(--line);margin:0 auto 16px;display:block;background:var(--bg3);object-fit:cover}
+.modal-prev.rect{border-radius:var(--r-sm)}
+.drop-z{border:1.5px dashed var(--line);border-radius:var(--r-sm);padding:20px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px;background:var(--bg1)}
+.drop-z:hover,.drop-z.dz-on{border-color:var(--g);background:var(--bg3)}
+.drop-z p{font-size:13px;color:var(--t3);margin-top:8px}
+.url-row{position:relative;margin-bottom:8px}
+.url-apply{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--g3);color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;transition:background 0.15s}
+.url-apply:hover{background:var(--g)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.gdrive-note{font-size:12px;color:var(--t4);padding:10px 14px;background:var(--bg3);border-radius:var(--r-sm);line-height:1.6;margin-bottom:10px}
+
+/* ── COLOR PICKER ── */
+.cpop{position:fixed;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:12px;z-index:800;box-shadow:var(--sh3);display:none;min-width:200px}
+.cp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px}
+.cp-c{width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:transform .1s}
+.cp-c:hover,.cp-c.sel{transform:scale(1.2);border-color:var(--t1)}
+.cp-custom{display:flex;gap:6px;align-items:center}
+.cp-custom input[type=color]{width:26px;height:24px;border:none;background:none;cursor:pointer;padding:0;border-radius:4px}
+.cp-hex{flex:1;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:4px 6px;color:var(--t1);font-size:12px;font-family:monospace}
+
+/* ── CANDIDATE DETAIL MODAL ── */
+.cand-modal .modal-box{max-width:540px;padding:24px}
+.cd-hero{background:var(--bg3);border-radius:var(--r);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
+.cd-hero-bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.cd-av{width:84px;height:84px;border-radius:50%;overflow:hidden;border:3px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
+.cd-rank{display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;margin-bottom:6px}
+.cd-name{font-size:22px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.cd-party{font-size:14px;color:var(--t3);font-weight:500}
+.cd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.cd-stat{background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r-sm);padding:14px;text-align:center}
+.cd-stat-val{font-size:24px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.cd-stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.cd-bar-section{margin-bottom:20px}
+.cd-bar-lbl{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.cd-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cd-bar-label{font-size:13px;color:var(--t2);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;font-weight:500}
+.cd-bar-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.cd-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.cd-bar-pct{font-size:12px;font-weight:600;color:var(--t2);width:40px;text-align:right;flex-shrink:0}
+.cd-dist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;max-height:140px;overflow-y:auto}
+.cd-dist-pill{background:var(--bg3);border:1px solid var(--line2);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--t2);text-align:center;font-weight:500}
+.cd-dist-pill.win{border-color:currentColor;color:var(--t1)}
+
 /* ── TOAST NOTIFICATION ── */
 .toast {
   position: fixed;
@@ -522,7 +573,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     </div>
   </div>
 
-  <!-- CANDIDATE LIST ROW (ย้ายขึ้นมาบนสุด) -->
+  <!-- CANDIDATE LIST ROW -->
   <div class="bottom-row" style="margin-bottom:20px">
     <div class="cands-card">
       <div class="cands-card-hd">
@@ -606,7 +657,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     </div>
   </div>
 
-  <!-- ── SKG OVERVIEW ── Updated for more space -->
+  <!-- ── SKG OVERVIEW ── -->
   <div id="skg-overview-card" class="skg-overview">
     <div class="skg-ov-hd">
       <div style="font-size:14px;font-weight:800;color:var(--t1)">ผล สก. ภาพรวม</div>
@@ -749,6 +800,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     <div class="drop-z" onclick="document.getElementById('logo-file').click()"><div style="margin-bottom:6px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><p style="font-size:12px">อัปโหลดไฟล์ PNG / SVG</p></div>
     <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="logoFilePick(this)">
     <div class="url-row"><input class="inp" id="logo-url" placeholder="หรือวาง URL..." oninput="logoUrlPrev(this.value)" style="padding-right:54px"><button class="url-apply" onclick="logoApplyUrl()" style="font-size:11px;padding:4px 10px">พรีวิว</button></div>
+    <div class="gdrive-note">Google Drive URL: drive.google.com/thumbnail?id=FILE_ID&sz=s200</div>
     <div class="modal-actions"><button class="btn-p" onclick="logoApply()" style="flex:1;font-size:13px">✓ นำไปใช้</button><button class="btn-s" onclick="logoRemove()" style="font-size:13px">✕ ลบโลโก้</button></div>
   </div>
 </div>
@@ -880,8 +932,9 @@ let simTimer=null,simStep=22,chart=null;
 let colorTarget=null,mode='firebase',currentData=null,selectedDistrict=null;
 let districtData=null,skgData={};
 let modalIdx=null,modalField=null,modalTempSrc=null;
+
 // ── DEFAULT MODE SETUP ──
-let mode='gsheet'; // Set default mode to GSheet for easier management
+mode='gsheet'; // Set default mode to GSheet for easier management
 
 function setMode(m,btn){
   mode=m;
@@ -985,7 +1038,6 @@ const medals = MEDAL_SVG;
     const avCls='ci-av'+(isFirst?' r1':'');
     const av=c.avatar?`<div class="${avCls}"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','${avCls}',${avSize})"></div>`:svgAvHtml(c.name,c.color,avCls,avSize);
     
-    // ใส่เบอร์ลงในรายชื่อผู้สมัครให้ตัวใหญ่ขึ้น
     const noBadge = c.no ? `<span style="background:var(--bg3);border:1.5px solid var(--line);padding:2px 6px;border-radius:4px;font-size:12px;margin-right:6px;color:var(--t2);font-weight:700">เบอร์ ${c.no}</span>` : '';
     
     return `<div class="ci" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s">
@@ -1145,11 +1197,7 @@ function renderSKGOverview(){
   }).join('');
 }
 
-// ── GOOGLE SHEETS ──────────────────────────────────────────────
-function sheetURLtoCSV(url,gidOverride){
-  const mId=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  if(!mId) throw new Error('ไม่พบ Spreadsheet ID');
-// ── GOOGLE SHEETS PARSERS (ROBUST HEADER MATCHING) ──
+// ── GOOGLE SHEETS PARSERS ──────────────────────────────────────
 function sheetURLtoCSV(url,gidOverride){
   const mId=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
   if(!mId) throw new Error('ไม่พบ Spreadsheet ID');
@@ -1179,7 +1227,6 @@ async function loadFromCSVUrl(csvUrl,lbl){
       if(cols.includes('name')||cols.includes('votes')||cols.includes('party')){headerIdx=i;break;}
     }
     
-    // Robust header matching logic
     const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
     const getVal = (r, keyTokens) => {
        const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
@@ -1242,7 +1289,6 @@ async function loadDistrictSheet(url){
         if(h.includes('district') || h.includes('เขต')) obj.district=val;
         else if(h.includes('counted') || h.includes('นับ')) obj.counted=val==='1'||val.toLowerCase()==='true'||val==='นับแล้ว';
         else if(h.startsWith('votes_') || h.startsWith('คะแนนเบอร์') || h.includes('_')) {
-           // Support flexible vote mapping e.g., votes_1, 1, 2, 3
            let numMatch = h.match(/\d+/);
            if(numMatch) obj['votes_'+numMatch[0]] = parseInt(val)||0;
         }
@@ -1410,7 +1456,7 @@ function openCandDetail(idx){
     const xpct=tv?(x.votes/tv*100).toFixed(1):0;
     const barW=maxV?(x.votes/maxV*100).toFixed(1):0;
     const isThis=x.id===c.id;
-    return `<div class="cd-bar-row"><div class="cd-bar-label" style="color:${isThis?x.color:'var(--t3)';font-weight:isThis?'700':'500'}">${isThis?'▶ ':''}${x.name.slice(0,14)}${x.name.length>14?'…':''}</div><div class="cd-bar-track"><div class="cd-bar-fill" style="width:${barW}%;background:${isThis?x.color:x.color+'44'}"></div></div><div class="cd-bar-pct" style="color:${isThis?x.color:'var(--t3)';font-weight:isThis?'700':'500'}">${xpct}%</div></div>`;
+    return `<div class="cd-bar-row"><div class="cd-bar-label" style="color:${isThis?x.color:'var(--t3)'};font-weight:${isThis?'700':'500'}">${isThis?'▶ ':''}${x.name.slice(0,14)}${x.name.length>14?'…':''}</div><div class="cd-bar-track"><div class="cd-bar-fill" style="width:${barW}%;background:${isThis?x.color:x.color+'44'}"></div></div><div class="cd-bar-pct" style="color:${isThis?x.color:'var(--t3)'};font-weight:${isThis?'700':'500'}">${xpct}%</div></div>`;
   }).join('');
   document.getElementById('cd-dist-grid').innerHTML=distWins.length>0?distWins.map(dw=>`<div class="cd-dist-pill win" style="color:${c.color};border-color:${c.color}55">${dw.name}</div>`).join(''):'<div style="font-size:12px;color:var(--t4);padding:10px 0">ยังไม่ชนะเขตใด</div>';
   document.getElementById('cand-detail-modal').classList.add('open');
