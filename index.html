@@ -552,7 +552,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     </div>
   </div>
 
-  <!-- CANDIDATE LIST ROW (ย้ายขึ้นมาบนสุด) -->
+  <!-- CANDIDATE LIST ROW -->
   <div class="bottom-row" style="margin-bottom:20px">
     <div class="cands-card">
       <div class="cands-card-hd">
@@ -1274,15 +1274,21 @@ function parseCSV(text) {
   return rows;
 }
 
+// ฟังก์ชันหาบรรทัดหัวตารางที่แม่นยำขึ้น ป้องกันการดึงบรรทัด Title ผิดพลาด
 function findHeaderIndex(rows, requiredTokens) {
   for(let i=0; i<Math.min(rows.length, 10); i++) {
-    const cols = rows[i].map(c=>(c||'').toLowerCase());
+    const cols = rows[i].map(c=>(c||'').toLowerCase().trim());
+    // ต้องมีคอลัมน์ที่มีข้อมูลอย่างน้อย 3 คอลัมน์ขึ้นไป เพื่อป้องกันการเอาบรรทัด Title ไปเป็นหัวตาราง
+    if (cols.filter(c => c !== '').length < 3) continue;
+    
     const hasAll = requiredTokens.every(group => 
       cols.some(c => group.some(token => c.includes(token)))
     );
     if (hasAll) return i;
   }
-  return 0; // fallback
+  // ถ้าหาไม่เจอจริงๆ ให้เอาบรรทัดแรกสุดที่มีคอลัมน์เยอะๆ
+  const fallback = rows.findIndex(r => r.filter(c=>(c||'').trim() !== '').length >= 3);
+  return fallback >= 0 ? fallback : 0;
 }
 
 async function loadMainSheet(csvUrl) {
@@ -1336,7 +1342,7 @@ async function loadDistrictSheet(csvUrl){
     const rows = parseCSV(text);
     if(rows.length < 2) return;
     
-    const reqTokens = [['district', 'เขต']];
+    const reqTokens = [['district', 'เขต'], ['counted', 'นับ']];
     const distHdrIdx = findHeaderIndex(rows, reqTokens);
     const hdr = rows[distHdrIdx].map(h=>(h||'').toLowerCase().trim());
     
@@ -1504,7 +1510,12 @@ function upd(i,k,v){cands[i][k]=v;}
 function addCand(){cands.push({id:Date.now(),no:'',name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
 function delCand(i){if(cands.length<=1)return;cands.splice(i,1);renderTable();}
 function resetCands(){if(!confirm('ยืนยันการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้น?'))return;cands=JSON.parse(JSON.stringify(DEF));renderTable();}
-function saveCands(){closeCMS();startSim();} 
+function saveCands(){
+  closeCMS();
+  startSim();
+  ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+  showToast('นำไปใช้แล้ว อย่าลืมบันทึกขึ้น Cloud', 'saving');
+} 
 let dragI=null;
 function ds(e,i){dragI=i;}function dov(e){e.preventDefault();}
 function dpr(e,i){e.preventDefault();if(dragI===null||dragI===i)return;const m=cands.splice(dragI,1)[0];cands.splice(i,0,m);dragI=null;renderTable();}
