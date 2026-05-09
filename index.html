@@ -1316,6 +1316,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
       const first=(r[0]||'').trim();
       if(!first) return false;
       if(first.startsWith('📋')||first.startsWith('รวม')||first.length>30) return false;
+      if(first === 'ลำดับ' || first.toLowerCase() === 'no') return false;
       const rawV=getVal(r, ['vote', 'คะแนน']).replace(/,/g,'');
       if(rawV&&isNaN(parseInt(rawV))) return false;
       return true;
@@ -1386,6 +1387,7 @@ async function loadDistrictSheet(url){
     districtData = rows.slice(distHdrIdx+1).filter(r=>{
       const first = (r[0]||'').trim();
       if(!first||first.length>25||first.startsWith('รวม')) return false;
+      if(first === 'ชื่อเขต' || first.toLowerCase() === 'district') return false;
       return true;
     }).map(r=>{
       const obj={};
@@ -1422,7 +1424,9 @@ async function loadSKGSheet(url){
     skgData={};
     rows.slice(hdrIdx+1).filter(r=>{
       const f=(r[0]||'').trim();
-      return f&&f.length<=25&&!f.startsWith('รวม');
+      if(!f || f.length>25 || f.startsWith('รวม')) return false;
+      if(f === 'ชื่อเขต' || f.toLowerCase() === 'district') return false;
+      return true;
     }).forEach(r=>{
       const get = keyTokens => {
          const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
