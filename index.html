@@ -11,10 +11,9 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
 <style>
-/* ════ TOKENS (Adjusted for better readability) ════ */
+/* ════ TOKENS (Dark Theme) ════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Navy-dark WeVis palette */
   --bg0:   #080e14;
   --bg1:   #0e1621;
   --bg2:   #131f2e;
@@ -22,13 +21,8 @@
   --bg4:   #243348;
   --line:  #2a3a52;
   --line2: #1e2d42;
-  /* Text - Lightened for better contrast */
   --t1:#ffffff; --t2:#d1dde8; --t3:#9db1cc; --t4:#5a7391;
-  /* Accent green */
   --g:  #00dfa6; --g2:#00c896; --g3:#00a67a; --gd:rgba(0,223,166,.15);
-  /* Candidate palette */
-  --c1:#00dfa6; --c2:#4d9fff; --c3:#ffcc00; --c4:#ff6b6b; --c5:#c084fc; --c6:#fb923c;
-  /* Status */
   --red:#fca5a5; --amber:#fde047; --accent:#7dd3fc;
   --r:10px; --r-sm:6px; --r-lg:16px;
   --sh1:0 2px 6px rgba(0,0,0,.6);
@@ -36,7 +30,7 @@
   --sh3:0 12px 48px rgba(0,0,0,.8);
 }
 html{overflow-x:hidden;scroll-behavior:smooth}
-body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg0);color:var(--t2);font-size:15px;line-height:1.5;min-height:100vh} /* Increased base font */
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg0);color:var(--t2);font-size:15px;line-height:1.5;min-height:100vh}
 img{display:block;max-width:100%}
 button,input,select,textarea{font-family:inherit}
 code{font-family:'IBM Plex Mono',monospace;font-size:12px}
@@ -44,7 +38,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 /* ════ TOPBAR ════ */
 .topbar{
   position:sticky;top:0;z-index:200;
-  height:60px; /* Taller topbar */
+  height:60px;
   background:rgba(8,14,20,.95);
   backdrop-filter:blur(12px);
   border-bottom:1px solid var(--line2);
@@ -62,7 +56,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .tb-brand span{color:var(--g);font-weight:400}
 .tb-sep{width:1.5px;height:24px;background:var(--line);flex-shrink:0}
 .tb-subtitle{font-size:14px;color:var(--t3);white-space:nowrap;font-weight:500}
-/* pills */
 .tb-right{display:flex;align-items:center;gap:10px;margin-left:auto}
 .live-badge{
   display:flex;align-items:center;gap:6px;
@@ -111,11 +104,10 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 /* ── HERO ROW — stats + winner ── */
 .hero-row{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr 340px; /* Wider winner card */
+  grid-template-columns:1fr 1fr 1fr 1fr 340px; 
   gap:14px;
   margin-bottom:20px
 }
-/* stat card */
 .sc{
   background:var(--bg2);border:1px solid var(--line2);
   border-radius:var(--r);padding:18px 20px;
@@ -171,8 +163,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
   display:flex;align-items:center;gap:14px;background:var(--bg1)
 }
 .cands-card-title{font-size:15px;font-weight:800;color:var(--t1)}
-.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:none} /* Wider boxes */
-/* candidate item */
+.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:none}
 .ci{
   display:flex;align-items:center;gap:14px;
   padding:16px 24px;cursor:pointer;
@@ -205,10 +196,9 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 /* ── MIDDLE ROW — district map + chart ── */
 .middle-row{
   display:grid;
-  grid-template-columns:1fr 360px; /* Wider right column */
+  grid-template-columns:1fr 360px;
   gap:14px;margin-bottom:20px
 }
-/* map card */
 .map-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
 .map-card-hd{
   padding:14px 20px;border-bottom:1px solid var(--line2);
@@ -218,8 +208,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .map-card-title{font-size:14px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:10px}
 .map-counted{font-size:14px;font-weight:800;color:var(--g)}
 .map-card-body{padding:16px;flex:1}
-
-/* district grid - Much more spacious */
 .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
 .dp{
   border:1.5px solid var(--line2);border-radius:8px;
@@ -235,19 +223,14 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .dp-stripe{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:3px 0 0 3px}
 .dp-nm{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:8px;margin-bottom:3px}
 .dp-winner{font-size:11px;font-weight:500;color:var(--t3);padding-left:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* map legend */
 .map-legend{padding:14px 20px;border-top:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:12px;background:var(--bg1)}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);font-weight:500}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
-/* right column in middle */
 .right-col{display:flex;flex-direction:column;gap:14px}
-/* chart card */
 .chart-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:16px}
 .card-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:14px}
-.chart-box{height:200px} /* Taller chart */
-/* source card */
+.chart-box{height:200px}
 .source-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:16px}
 .src-tabs{display:flex;gap:4px;background:var(--bg1);border-radius:var(--r-sm);padding:4px;border:1px solid var(--line2);margin-bottom:12px}
 .st{flex:1;text-align:center;padding:6px 8px;border-radius:4px;border:none;background:transparent;color:var(--t3);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
@@ -265,8 +248,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .btn-s:hover{border-color:var(--t3);color:var(--t1)}
 .hint{font-size:11px;color:var(--t4);margin-top:6px;line-height:1.6}
 .src-status{font-size:12px;color:var(--t3);margin-top:8px;display:flex;align-items:center;gap:6px;font-weight:500}
-
-/* sheet panel */
 .sheet-panel{display:none;margin-top:12px}
 .sheet-row{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center;margin-bottom:8px}
 .sheet-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)}
@@ -274,7 +255,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 /* ── DETAIL PANEL overlay ── */
 .detail-overlay{
   position:fixed;right:0;top:60px;bottom:0;
-  width:400px; /* Wider panel */
+  width:400px;
   background:var(--bg2);
   border-left:1px solid var(--line);
   transform:translateX(100%);transition:transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -294,7 +275,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .detail-body::-webkit-scrollbar{width:4px}
 .detail-body::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 
-/* district detail rows */
 .dd-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line2)}
 .dd-row:last-child{border-bottom:none}
 .dd-av{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0;border:1px solid var(--line)}
@@ -306,7 +286,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .dd-votes{font-size:13px;font-weight:700;color:var(--t1)}
 .dd-pct{font-size:11px;color:var(--t3);font-weight:500;margin-top:2px}
 
-/* skg section */
 .skg-section{margin-top:16px;padding-top:16px;border-top:1.5px dashed var(--line)}
 .skg-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:12px}
 .skg-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line2)}
@@ -320,10 +299,10 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
 .skg-votes{font-size:13px;font-weight:700;color:var(--t1);flex-shrink:0}
 .skg-elected{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,223,166,.15);color:var(--g);font-weight:700;display:inline-block;margin-top:4px}
 
-/* ── SKG OVERVIEW ── Updated for more space */
+/* ── SKG OVERVIEW ── */
 .skg-overview{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;margin-bottom:20px;display:none}
 .skg-ov-hd{padding:14px 24px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;background:var(--bg1)}
-.skg-ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:none} /* Wider boxes */
+.skg-ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:none}
 .skg-mini{padding:14px 20px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);cursor:pointer;transition:background .12s}
 .skg-mini:hover{background:var(--bg3)}
 .skg-mini-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -573,7 +552,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
     </div>
   </div>
 
-  <!-- CANDIDATE LIST ROW -->
+  <!-- CANDIDATE LIST ROW (ย้ายขึ้นมาบนสุด) -->
   <div class="bottom-row" style="margin-bottom:20px">
     <div class="cands-card">
       <div class="cands-card-hd">
@@ -696,7 +675,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:12px}
   <div class="imp-card" style="margin-top:20px">
     <div class="imp-card-title">Google Sheets (ผู้สมัครผู้ว่าฯ)</div>
     <input class="inp" id="gs-url2" value="https://docs.google.com/spreadsheets/d/1abANACpNrqcd_Yv7S2qeTe2vdDkJZkoAgRgqQ-DWqcE/edit?gid=0#gid=0" style="margin-bottom:10px">
-    <button class="btn-p" onclick="loadGSheetURL2()">โหลดข้อมูล</button>
+    <button class="btn-p" onclick="loadGSheetURLImport()">โหลดข้อมูล</button>
     <div class="hint" style="margin-top:8px;font-size:12px">หัวคอลัมน์ที่รองรับ: No, Name, Party, Votes, Color, AvatarURL, PartyLogoURL</div>
   </div>
 </div>
@@ -894,8 +873,9 @@ function showCMSTab(id,btn){
 function toggleSheetPanel(){
   const p=document.getElementById('sheet-panel');
   const b=document.getElementById('sheet-panel-toggle');
-  const open=!p.style.display||p.style.display==='none';
-  p.style.display=open?'block':'none';b.innerHTML=open?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ปิดการตั้งค่า':'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> ตั้งค่าลิงก์';
+  const open=p.style.display==='none';
+  p.style.display=open?'block':'none';
+  b.textContent=open?'✕ ปิด':'⚙ ตั้งค่า Sheet';
 }
 function closeDetail(){
   document.getElementById('detail-overlay').classList.remove('open');
@@ -951,7 +931,6 @@ function getRealData() {
             for(const [h, val] of Object.entries(row._raw)) {
                const hk = h.toLowerCase();
                if (hk.includes('district') || hk.includes('เขต') || hk.includes('counted') || hk.includes('นับ')) continue;
-               
                if ((candNoStr && (hk === candNoStr || hk === `เบอร์ ${candNoStr}` || hk === `เบอร์${candNoStr}`)) || (hk.includes(candNameFirst) && candNameFirst.length > 2)) {
                   v = parseInt(val) || 0;
                   break;
@@ -1068,19 +1047,18 @@ function renderDash(d){
     const noBadge = w.no ? `<span style="font-size:14px;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:6px;margin-right:8px;vertical-align:middle;color:var(--t1)">เบอร์ ${w.no}</span>` : '';
     f('w-name').innerHTML= noBadge + w.name;
     
-    f('w-party-wrap').textContent=w.party;
+    f('w-party-wrap').innerHTML = w.partyLogo?`<img src="${w.partyLogo}" style="width:14px;height:14px;border-radius:3px;object-fit:cover" onerror="this.remove()"> ${w.party}`:w.party;
     f('w-votes').textContent=w.votes.toLocaleString()+' คะแนน';
     f('w-pct').textContent=(tv?(w.votes/tv*100).toFixed(1):0)+'%';
     f('w-bar').style.width=(tv?(w.votes/tv*100).toFixed(1):0)+'%';
   }
 
-  // candidate list — grid style
+  // candidate list
   const MEDAL_SVG = [
   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="#c9a22088"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#ffd700" font-family="sans-serif">1</text></svg>`,
   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="#8b949e55"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#c9d1d9" font-family="sans-serif">2</text></svg>`,
   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="12" cy="12" r="10" fill="#b7622255"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#fb923c" font-family="sans-serif">3</text></svg>`,
 ];
-const medals = MEDAL_SVG;
   f('cand-list').innerHTML=d.cands.map((c,i)=>{
     const vp=tv?(c.votes/tv*100).toFixed(1):0;
     const bw=d.cands[0].votes?(c.votes/d.cands[0].votes*100):0;
@@ -1088,6 +1066,7 @@ const medals = MEDAL_SVG;
     const avSize=isFirst?64:56;
     const avCls='ci-av'+(isFirst?' r1':'');
     const av=c.avatar?`<div class="${avCls}"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','${avCls}',${avSize})"></div>`:svgAvHtml(c.name,c.color,avCls,avSize);
+    const partyLogo = c.partyLogo?`<img src="${c.partyLogo}" onerror="this.remove()">`:'';
     
     const noBadge = c.no ? `<span style="background:var(--bg3);border:1.5px solid var(--line);padding:2px 6px;border-radius:4px;font-size:12px;margin-right:6px;color:var(--t2);font-weight:700">เบอร์ ${c.no}</span>` : '';
     
@@ -1098,11 +1077,11 @@ const medals = MEDAL_SVG;
       ${av}
       <div class="ci-info">
         <div class="ci-name" style="color:${isFirst?c.color:'var(--t1)'}">${noBadge}${c.name}</div>
-        <div class="ci-party">${c.party}</div>
+        <div class="ci-party">${partyLogo} ${c.party}</div>
         <div class="ci-bar"><div class="ci-bar-f" style="width:${bw.toFixed(1)}%;background:${c.color}"></div></div>
       </div>
       <div class="ci-score"><div class="ci-votes">${c.votes.toLocaleString()}</div><div class="ci-pct">${vp}%</div></div>
-      ${i<3?`<div class="ci-medal">${medals[i]}</div>`:''}
+      ${i<3?`<div class="ci-medal">${MEDAL_SVG[i]}</div>`:''}
     </div>`;
   }).join('');
 
@@ -1307,13 +1286,13 @@ function findHeaderIndex(rows, requiredTokens) {
 }
 
 async function loadMainSheet(csvUrl) {
-    const res=await fetch(sheetURLtoCSV(csvUrl));
+    const res = await fetch(csvUrl);
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const text=await res.text();
+    const text = await res.text();
     if(text.includes('html') && text.includes('google.com')) throw new Error('Google Sheet น่าจะถูกปิดเป็น Private อยู่');
     
     const rows = parseCSV(text);
-    if(rows.length<2) throw new Error('ไม่พบข้อมูลในไฟล์');
+    if(rows.length<2) throw new Error('ไม่พบข้อมูลในไฟล์ (ต้องมีอย่างน้อย 2 แถว)');
     
     const reqTokens = [['name', 'ชื่อ', 'ผู้สมัคร'], ['vote', 'คะแนน']];
     const headerIdx = findHeaderIndex(rows, reqTokens);
@@ -1347,17 +1326,16 @@ async function loadMainSheet(csvUrl) {
     })).filter(c=>c.name.length<50 && !isNaN(c.votes)).sort((a,b)=>b.votes-a.votes);
     
     if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์ "คะแนน" หรือ "votes"');
-    cands=parsed;
+    cands = parsed;
 }
 
-async function loadDistrictSheet(url){
-    const res=await fetch(sheetURLtoCSV(url));
+async function loadDistrictSheet(csvUrl){
+    const res = await fetch(csvUrl);
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const text=await res.text();
+    const text = await res.text();
     const rows = parseCSV(text);
-    if(rows.length<2) return;
+    if(rows.length < 2) return;
     
-    // Header doesn't have to perfectly say "district", we'll just pick the first row that looks like a header
     const reqTokens = [['district', 'เขต']];
     const distHdrIdx = findHeaderIndex(rows, reqTokens);
     const hdr = rows[distHdrIdx].map(h=>(h||'').toLowerCase().trim());
@@ -1385,12 +1363,12 @@ async function loadDistrictSheet(url){
     }).filter(r=>r.district&&r.district.length<40);
 }
 
-async function loadSKGSheet(url){
-    const res=await fetch(sheetURLtoCSV(url));
+async function loadSKGSheet(csvUrl){
+    const res = await fetch(csvUrl);
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const text=await res.text();
+    const text = await res.text();
     const rows = parseCSV(text);
-    if(rows.length<2) return;
+    if(rows.length < 2) return;
     
     const reqTokens = [['district', 'เขต'], ['name', 'ชื่อ']];
     const hdrIdx = findHeaderIndex(rows, reqTokens);
@@ -1437,7 +1415,12 @@ async function loadGSheetURL() {
   const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
   
   const statusEl=document.getElementById('sheet-status');
-  if(!url){document.getElementById('sheet-panel').style.display='block';document.getElementById('gs-url').focus();return;}
+  if(!url){
+    document.getElementById('sheet-panel').style.display='block';
+    document.getElementById('sheet-panel-toggle').textContent='✕ ปิด';
+    document.getElementById('gs-url').focus();
+    return;
+  }
   
   clearInterval(simTimer);
   document.getElementById('live-txt').textContent='กำลังโหลด...';
@@ -1447,7 +1430,7 @@ async function loadGSheetURL() {
   let parts = [];
 
   try {
-    await loadMainSheet(url);
+    await loadMainSheet(sheetURLtoCSV(url));
     successCount++;
     parts.push('ผู้ว่าฯ');
   } catch(e) {
@@ -1456,7 +1439,7 @@ async function loadGSheetURL() {
 
   if (distUrl) {
     try {
-      await loadDistrictSheet(distUrl);
+      await loadDistrictSheet(sheetURLtoCSV(distUrl));
       successCount++;
       parts.push('เขต');
     } catch(e) {
@@ -1467,7 +1450,7 @@ async function loadGSheetURL() {
 
   if (skgUrl) {
     try {
-      await loadSKGSheet(skgUrl);
+      await loadSKGSheet(sheetURLtoCSV(skgUrl));
       successCount++;
       parts.push('สก.');
     } catch(e) {
@@ -1492,7 +1475,6 @@ async function loadGSheetURL() {
   renderDash(getRealData());
 }
 
-async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadMainSheet(url);showToast('โหลดเสร็จสิ้น');simStep=60;renderDash(getRealData());}catch(e){showToast(e.message, 'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
   clearInterval(simTimer);
@@ -1502,7 +1484,7 @@ async function loadAPI(){
 // ── CANDIDATE TABLE ───────────────────────────────────────────
 function renderTable(){
   document.getElementById('cand-tbody').innerHTML=cands.map((c,i)=>{
-    const avEl=c.avatar?`<div class="av-th" onclick="openModal(${i},'avatar')"><img src="${c.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.innerHTML=svgAvHtml('${c.name}','${c.color}','',36)"></div>`:`<div class="av-th" onclick="openModal(${i},'avatar')">${svgAvHtml(c.name,c.color,'',36)}</div>`;
+    const avEl=c.avatar?`<div class="av-th" onclick="openModal(${i},'avatar')"><img src="${c.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.innerHTML=svgAvHtml('${c.name}','${c.color}','',36)"></div>`:`<div class="av-th" onclick="openModal(${i},'avatar')">${svgAv(c.name,c.color,36)}</div>`;
     const logoEl=c.partyLogo?`<div class="pt-th" onclick="openModal(${i},'partyLogo')"><img src="${c.partyLogo}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.innerHTML='+'"></div>`:`<div class="pt-th" onclick="openModal(${i},'partyLogo')">+</div>`;
     return `<tr>
       <td><span class="drag-h" draggable="true" ondragstart="ds(event,${i})" ondragover="dov(event)" ondrop="dpr(event,${i})">⋮⋮</span></td>
@@ -1522,12 +1504,7 @@ function upd(i,k,v){cands[i][k]=v;}
 function addCand(){cands.push({id:Date.now(),no:'',name:'ผู้สมัครใหม่',party:'อิสระ',votes:10000,color:PRESET[cands.length%PRESET.length],avatar:'',partyLogo:''});renderTable();}
 function delCand(i){if(cands.length<=1)return;cands.splice(i,1);renderTable();}
 function resetCands(){if(!confirm('ยืนยันการรีเซ็ตข้อมูลทั้งหมดกลับเป็นค่าเริ่มต้น?'))return;cands=JSON.parse(JSON.stringify(DEF));renderTable();}
-function saveCands(){
-  closeCMS();
-  startSim();
-  ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
-  showToast('นำไปใช้แล้ว อย่าลืมบันทึกขึ้น Cloud', 'saving');
-} 
+function saveCands(){closeCMS();startSim();} 
 let dragI=null;
 function ds(e,i){dragI=i;}function dov(e){e.preventDefault();}
 function dpr(e,i){e.preventDefault();if(dragI===null||dragI===i)return;const m=cands.splice(dragI,1)[0];cands.splice(i,0,m);dragI=null;renderTable();}
@@ -1577,7 +1554,7 @@ document.getElementById('logo-modal').addEventListener('click',e=>{if(e.target==
 
 // ── IMPORT/EXPORT ─────────────────────────────────────────────
 function importJSON(){try{const a=JSON.parse(document.getElementById('imp-json').value.trim());if(!Array.isArray(a))throw 0;cands=a.map((c,i)=>({id:c.id||i+1,no:c.no||'',name:c.name||'ผู้สมัคร'+(i+1),party:c.party||'อิสระ',votes:parseInt(c.votes)||0,color:c.color||PRESET[i%PRESET.length],avatar:c.avatar||'',partyLogo:c.partyLogo||''}));showToast('นำเข้าสำเร็จ '+cands.length+' คน');updateExpPreview();}catch{showToast('JSON ไม่ถูกต้อง', 'error');}}
-function readFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{if(f.name.endsWith('.json')){document.getElementById('imp-json').value=e.target.result;importJSON();}};r.readAsText(f);}
+function readFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{if(f.name.endsWith('.json')){document.getElementById('imp-json').value=e.target.result;importJSON();}};}
 async function pasteClip(){try{document.getElementById('imp-json').value=await navigator.clipboard.readText();}catch{showToast('ไม่สามารถอ่าน Clipboard', 'error');}}
 function exportJSON(){const b=new Blob([JSON.stringify(cands,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.json';a.click();}
 function exportCSV(){const rows=[['no','name','party','votes','color','avatar','partyLogo'],...cands.map(c=>[c.no,c.name,c.party,c.votes,c.color,c.avatar,c.partyLogo])];const b=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='candidates.csv';a.click();}
@@ -1611,7 +1588,7 @@ function openCandDetail(idx){
   document.getElementById('cd-name').innerHTML= noBadge + c.name;
   
   document.getElementById('cd-modal-title').textContent=c.name;
-  document.getElementById('cd-party-row').textContent=c.party;
+  document.getElementById('cd-party-row').innerHTML=c.partyLogo?`<img src="${c.partyLogo}" style="width:16px;height:16px;border-radius:3px;object-fit:cover" onerror="this.remove()"> ${c.party}`:c.party;
   document.getElementById('cd-votes').textContent=c.votes>=1e6?(c.votes/1e6).toFixed(3)+'M':c.votes.toLocaleString();
   document.getElementById('cd-pct').textContent=pct+'%';
   const distWins=d.distWin.filter(dw=>dw.counted&&dw.winner&&dw.winner.id===c.id);
@@ -1642,12 +1619,7 @@ async function initFirebase() {
       config = JSON.parse(__firebase_config);
     } else {
       config = {
-        apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        authDomain: "bkk-election-vote.firebaseapp.com",
-        projectId: "bkk-election-vote",
-        storageBucket: "bkk-election-vote.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abcdef123456"
+        projectId: "bkk-election-vote"
       };
     }
     
@@ -1776,6 +1748,7 @@ if(gsPmEl) gsPmEl.style.display='block';
 
 // ── เริ่ม init Firebase ──
 initFirebase();
+
 </script>
 </body>
 </html>
