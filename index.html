@@ -1242,16 +1242,46 @@ function sheetURLtoCSV(url,gidOverride){
   if(mGid) gid=mGid[1];
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 }
-function parseCSVLine(line){
-  const r=[];let cur='',inQ=false;
-  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){r.push(cur.trim());cur='';}else{cur+=c;}}
-  r.push(cur.trim());return r;
+
+// Robust CSV Parser that handles newlines and commas inside quotes
+function parseCSV(text) {
+  const rows = [];
+  let cur = [];
+  let cell = '';
+  let inQ = false;
+  for(let i=0; i<text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (i+1 < text.length && text[i+1] === '"') { cell += '"'; i++; }
+        else { inQ = false; }
+      } else {
+        cell += c;
+      }
+    } else {
+      if (c === '"') { inQ = true; }
+      else if (c === ',') { cur.push(cell.trim()); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && i+1 < text.length && text[i+1] === '\n') i++; // Skip \n after \r
+        cur.push(cell.trim());
+        if (cur.some(x => x !== '')) rows.push(cur);
+        cur = [];
+        cell = '';
+      } else {
+        cell += c;
+      }
+    }
+  }
+  if (cell || cur.length > 0) {
+    cur.push(cell.trim());
+    if (cur.some(x => x !== '')) rows.push(cur);
+  }
+  return rows;
 }
 
-// ── HELPER: หาบรรทัดที่เป็นหัวตารางให้แม่นยำ ──
-function findHeaderIndex(lines, requiredTokens) {
-  for(let i=0; i<Math.min(lines.length, 6); i++) {
-    const cols = parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
+function findHeaderIndex(rows, requiredTokens) {
+  for(let i=0; i<Math.min(rows.length, 6); i++) {
+    const cols = rows[i].map(c=>(c||'').toLowerCase());
     const hasAll = requiredTokens.every(group => 
       cols.some(c => group.some(token => c.includes(token)))
     );
@@ -1269,21 +1299,21 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const text=await res.text();
     if(text.includes('html') && text.includes('google.com')) throw new Error('Google Sheet น่าจะถูกปิดเป็น Private อยู่');
     
-    const lines=text.trim().split('\n').filter(l=>l.trim());
-    if(lines.length<2) throw new Error('ไม่พบข้อมูลในไฟล์');
+    const rows = parseCSV(text);
+    if(rows.length<2) throw new Error('ไม่พบข้อมูลในไฟล์');
     
     const reqTokens = [['name', 'ชื่อ', 'ผู้สมัคร'], ['vote', 'คะแนน']];
-    const headerIdx = findHeaderIndex(lines, reqTokens);
+    const headerIdx = findHeaderIndex(rows, reqTokens);
     
-    const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
+    const hdr = rows[headerIdx].map(h=>(h||'').toLowerCase().trim());
     
     const getVal = (r, keyTokens) => {
        const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
-       return match >= 0 ? (r[match] || '').replace(/^"+|"+$/g, '').trim() : '';
+       return match >= 0 ? (r[match] || '').trim() : '';
     };
     
-    const rows=lines.slice(headerIdx+1).map(parseCSVLine).filter(r=>{
-      const first=(r[0]||'').replace(/^"+|"+$/g,'').trim();
+    const parsedRows = rows.slice(headerIdx+1).filter(r=>{
+      const first=(r[0]||'').trim();
       if(!first) return false;
       if(first.startsWith('📋')||first.startsWith('รวม')||first.length>30) return false;
       const rawV=getVal(r, ['vote', 'คะแนน']).replace(/,/g,'');
@@ -1291,7 +1321,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
       return true;
     });
     
-    const parsed=rows.map((r,i)=>({
+    const parsed = parsedRows.map((r,i)=>({
       id:i+1,
       no: getVal(r, ['no', 'เบอร์', 'ลำดับ']),
       name: getVal(r, ['name', 'ชื่อ', 'ผู้สมัคร']) || 'ผู้สมัคร '+(i+1),
@@ -1346,21 +1376,21 @@ async function loadDistrictSheet(url){
     const res=await fetch(sheetURLtoCSV(url));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
-    const lines=text.trim().split('\n').filter(l=>l.trim());
-    if(lines.length<2) return;
+    const rows = parseCSV(text);
+    if(rows.length<2) return;
     
     const reqTokens = [['district', 'เขต']];
-    const distHdrIdx = findHeaderIndex(lines, reqTokens);
-    const hdr=parseCSVLine(lines[distHdrIdx]).map(h=>(h||'').toLowerCase().trim());
+    const distHdrIdx = findHeaderIndex(rows, reqTokens);
+    const hdr = rows[distHdrIdx].map(h=>(h||'').toLowerCase().trim());
     
-    districtData=lines.slice(distHdrIdx+1).map(parseCSVLine).filter(r=>{
-      const first=(r[0]||'').replace(/^"+|"+$/g,'').trim();
+    districtData = rows.slice(distHdrIdx+1).filter(r=>{
+      const first = (r[0]||'').trim();
       if(!first||first.length>25||first.startsWith('รวม')) return false;
       return true;
     }).map(r=>{
       const obj={};
       hdr.forEach((h,i)=>{
-        const val=(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim();
+        const val = (r[i]||'').replace(/,/g,'').trim();
         if(h.includes('district') || h.includes('เขต')) obj.district=val;
         else if(h.includes('counted') || h.includes('นับ')) obj.counted=val==='1'||val.toLowerCase()==='true'||val.includes('นับแล้ว');
         else if(h.startsWith('votes_') || h.startsWith('คะแนน') || h.includes('_') || /^\d+$/.test(h)) {
@@ -1382,21 +1412,21 @@ async function loadSKGSheet(url){
     const res=await fetch(sheetURLtoCSV(url));
     if(!res.ok) throw new Error('HTTP '+res.status);
     const text=await res.text();
-    const lines=text.trim().split('\n').filter(l=>l.trim());
-    if(lines.length<2) return;
+    const rows = parseCSV(text);
+    if(rows.length<2) return;
     
     const reqTokens = [['district', 'เขต'], ['name', 'ชื่อ']];
-    const hdrIdx = findHeaderIndex(lines, reqTokens);
-    const hdr=parseCSVLine(lines[hdrIdx]).map(h=>(h||'').toLowerCase().trim());
+    const hdrIdx = findHeaderIndex(rows, reqTokens);
+    const hdr = rows[hdrIdx].map(h=>(h||'').toLowerCase().trim());
     
     skgData={};
-    lines.slice(hdrIdx+1).map(parseCSVLine).filter(r=>{
-      const f=(r[0]||'').replace(/^"+|"+$/g,'').trim();
+    rows.slice(hdrIdx+1).filter(r=>{
+      const f=(r[0]||'').trim();
       return f&&f.length<=25&&!f.startsWith('รวม');
     }).forEach(r=>{
       const get = keyTokens => {
          const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
-         return match >= 0 ? (r[match] || '').replace(/^"+|"+$/g, '').trim() : '';
+         return match >= 0 ? (r[match] || '').trim() : '';
       };
       
       const dist = get(['district', 'เขต']);
