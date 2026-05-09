@@ -1212,6 +1212,19 @@ function parseCSVLine(line){
   for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){r.push(cur.trim());cur='';}else{cur+=c;}}
   r.push(cur.trim());return r;
 }
+
+// ── HELPER: หาบรรทัดที่เป็นหัวตารางให้แม่นยำ ──
+function findHeaderIndex(lines, requiredTokens) {
+  for(let i=0; i<Math.min(lines.length, 6); i++) {
+    const cols = parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
+    const hasAll = requiredTokens.every(group => 
+      cols.some(c => group.some(token => c.includes(token)))
+    );
+    if (hasAll) return i;
+  }
+  return 0; // fallback
+}
+
 async function loadFromCSVUrl(csvUrl,lbl){
   clearInterval(simTimer);document.getElementById('live-txt').textContent='โหลด...';
   try{
@@ -1221,13 +1234,12 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) throw new Error('ไม่พบข้อมูล');
     
-    let headerIdx=0;
-    for(let i=0;i<Math.min(lines.length,6);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase().replace(/[^a-z]/g,''));
-      if(cols.includes('name')||cols.includes('votes')||cols.includes('party')){headerIdx=i;break;}
-    }
+    const reqTokens = [['name', 'ชื่อ'], ['vote', 'คะแนน']];
+    const headerIdx = findHeaderIndex(lines, reqTokens);
     
+    // ไม่ใช้ replace(/[^a-z]/g,'') เพื่อรักษาภาษาไทยไว้
     const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
+    
     const getVal = (r, keyTokens) => {
        const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
        return match >= 0 ? (r[match] || '').replace(/^"+|"+$/g, '').trim() : '';
@@ -1248,12 +1260,12 @@ async function loadFromCSVUrl(csvUrl,lbl){
       name: getVal(r, ['name', 'ชื่อ']) || 'ผู้สมัคร '+(i+1),
       party: getVal(r, ['party', 'พรรค', 'สังกัด']) || 'อิสระ',
       votes: parseInt(getVal(r, ['vote', 'คะแนน']).replace(/[^0-9]/g,''))||0,
-      color: getVal(r, ['color', 'สี']) || PRESET[i%PRESET.length],
+      color: getVal(r, ['color', 'สี', 'hex']) || PRESET[i%PRESET.length],
       avatar: getVal(r, ['avatar', 'รูป']),
       partyLogo: getVal(r, ['logo', 'โลโก้']),
-    })).filter(c=>c.name.length<50 && c.votes>=0).sort((a,b)=>b.votes-a.votes);
+    })).filter(c=>c.name.length<50 && !isNaN(c.votes)).sort((a,b)=>b.votes-a.votes);
     
-    if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์ Votes');
+    if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์คะแนน');
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
     document.getElementById('live-txt').textContent='โหลดแล้ว';
@@ -1270,13 +1282,9 @@ async function loadDistrictSheet(url){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) return;
     
-    let distHdrIdx=0;
-    for(let i=0;i<Math.min(lines.length,5);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
-      if(cols.some(c=>c.includes('district')||c.includes('เขต'))){distHdrIdx=i;break;}
-    }
-    
-    const header=parseCSVLine(lines[distHdrIdx]).map(h=>(h||'').toLowerCase().trim());
+    const reqTokens = [['district', 'เขต']];
+    const distHdrIdx = findHeaderIndex(lines, reqTokens);
+    const hdr=parseCSVLine(lines[distHdrIdx]).map(h=>(h||'').toLowerCase().trim());
     
     districtData=lines.slice(distHdrIdx+1).map(parseCSVLine).filter(r=>{
       const first=(r[0]||'').replace(/^"+|"+$/g,'').trim();
@@ -1284,11 +1292,11 @@ async function loadDistrictSheet(url){
       return true;
     }).map(r=>{
       const obj={};
-      header.forEach((h,i)=>{
+      hdr.forEach((h,i)=>{
         const val=(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim();
         if(h.includes('district') || h.includes('เขต')) obj.district=val;
-        else if(h.includes('counted') || h.includes('นับ')) obj.counted=val==='1'||val.toLowerCase()==='true'||val==='นับแล้ว';
-        else if(h.startsWith('votes_') || h.startsWith('คะแนนเบอร์') || h.includes('_')) {
+        else if(h.includes('counted') || h.includes('นับ')) obj.counted=val==='1'||val.toLowerCase()==='true'||val.includes('นับแล้ว');
+        else if(h.startsWith('votes_') || h.startsWith('คะแนน') || h.includes('_') || /^\d+$/.test(h)) {
            let numMatch = h.match(/\d+/);
            if(numMatch) obj['votes_'+numMatch[0]] = parseInt(val)||0;
         }
@@ -1300,6 +1308,7 @@ async function loadDistrictSheet(url){
     simStep=60;renderDash(mockData());
   }catch(e){showToast('โหลดเขตไม่สำเร็จ: '+e.message, 'error');}
 }
+
 async function loadSKGSheet(url){
   try{
     const res=await fetch(sheetURLtoCSV(url));
@@ -1307,21 +1316,36 @@ async function loadSKGSheet(url){
     const text=await res.text();
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) return;
-    let hdrIdx=0;
-    for(let i=0;i<Math.min(lines.length,5);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
-      if(cols.some(c=>c.includes('district'))&&cols.some(c=>c.includes('name'))){hdrIdx=i;break;}
-    }
-    const hdr=parseCSVLine(lines[hdrIdx]).map(h=>(h||'').toLowerCase().replace(/[^a-z_]/g,'').trim());
+    
+    const reqTokens = [['district', 'เขต'], ['name', 'ชื่อ']];
+    const hdrIdx = findHeaderIndex(lines, reqTokens);
+    const hdr=parseCSVLine(lines[hdrIdx]).map(h=>(h||'').toLowerCase().trim());
+    
     skgData={};
     lines.slice(hdrIdx+1).map(parseCSVLine).filter(r=>{
       const f=(r[0]||'').replace(/^"+|"+$/g,'').trim();
       return f&&f.length<=25&&!f.startsWith('รวม');
     }).forEach(r=>{
-      const get=k=>{const i=hdr.indexOf(k);return i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';};
-      const dist=get('district');if(!dist) return;
+      const get = keyTokens => {
+         const match = hdr.findIndex(h => keyTokens.some(k => h.includes(k)));
+         return match >= 0 ? (r[match] || '').replace(/^"+|"+$/g, '').trim() : '';
+      };
       
-      const entry={no:get('no')||get('เบอร์')||'',name:get('name'),party:get('party')||'อิสระ',votes:parseInt(get('votes'))||0,elected:get('elected')==='1',color:get('color')||'',avatar:get('avatar_url')||get('avatar')||''};
+      const dist = get(['district', 'เขต']);
+      if(!dist) return;
+      
+      const electedStr = get(['elected', 'ได้', 'สถานะ']).toLowerCase();
+      const isElected = electedStr==='1' || electedStr==='true' || electedStr.includes('ได้');
+      
+      const entry={
+        no: get(['no', 'เบอร์', 'ลำดับ']),
+        name: get(['name', 'ชื่อ']),
+        party: get(['party', 'พรรค', 'สังกัด']) || 'อิสระ',
+        votes: parseInt(get(['vote', 'คะแนน']).replace(/[^0-9]/g,''))||0,
+        elected: isElected,
+        color: get(['color', 'สี', 'hex']),
+        avatar: get(['avatar', 'รูป'])
+      };
       if(!entry.name) return;
       if(!skgData[dist]) skgData[dist]=[];
       skgData[dist].push(entry);
@@ -1331,6 +1355,7 @@ async function loadSKGSheet(url){
     renderSKGOverview();
   }catch(e){showToast('โหลด สก. ไม่สำเร็จ: '+e.message, 'error');}
 }
+
 async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){showToast(e.message, 'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
