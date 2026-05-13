@@ -925,27 +925,53 @@ function setMode(m,btn){
 
 // ── SIMULATION ────────────────────────────────────────────────
 function mockData(){
+  // ── ถ้ามี districtData → คำนวณคะแนนจากเขตจริง ────────────────────
+  if(districtData && districtData.length > 0) {
+    return buildFromDistricts();
+  }
+  // ── fallback: simulation ────────────────────────────────────────────
   const total=parseInt(document.getElementById('cfg-total')?.value)||50;
   const vr=document.getElementById('cfg-var')?.value||'mid';
   const spread=vr==='low'?.02:vr==='high'?.12:.06;
   const p=Math.min(.18+simStep*.018,.99);
   const counted=Math.round(total*p);
   const sorted=[...cands].map(c=>({...c,votes:Math.round(c.votes*p*(1-spread/2+Math.random()*spread))})).sort((a,b)=>b.votes-a.votes);
-  let distWin;
-  if(districtData&&districtData.length>0){
-    distWin=BKK_DISTRICTS.map(name=>{
-      const row=districtData.find(r=>r.district===name);
-      if(!row||!row.counted)return{name,winner:null,counted:false};
-      const dv=sorted.map((c,ci)=>({...c,votes:row['votes_'+(ci+1)]||0}));
-      const hasVotes=dv.some(c=>c.votes>0);
-      if(!hasVotes)return{name,winner:null,counted:true,distVotes:dv};
-      const best=dv.reduce((a,b)=>b.votes>a.votes?b:a,dv[0]);
-      return{name,winner:best,counted:true,distVotes:dv};
-    });
-  }else{
-    distWin=BKK_DISTRICTS.map((name,i)=>({name,winner:sorted[Math.abs((i*7+name.charCodeAt(0))%sorted.length)],counted:i<counted}));
-  }
+  const distWin=BKK_DISTRICTS.map((name,i)=>({name,winner:sorted[Math.abs((i*7+name.charCodeAt(0))%sorted.length)],counted:i<counted}));
   return{cands:sorted,counted,total,distWin,updated:new Date()};
+}
+
+// ── คำนวณคะแนนรวมจาก districtData จริง ─────────────────────────────
+function buildFromDistricts() {
+  // votes_1, votes_2... ใน districts ตรงกับลำดับแถวใน cands (0-indexed → votes_1 = cands[0])
+  // สร้าง map: candidateIndex → totalVotes
+  const totals = new Array(cands.length).fill(0);
+
+  let counted = 0;
+  const distWin = BKK_DISTRICTS.map(name => {
+    const row = districtData.find(r => r.district === name);
+    if (!row || !row.counted) return { name, winner: null, counted: false };
+
+    counted++;
+    // คะแนนแต่ละผู้สมัครในเขตนี้ — votes_1 = cands[0], votes_2 = cands[1], ...
+    const dv = cands.map((c, ci) => {
+      const v = row['votes_' + (ci + 1)] || 0;
+      totals[ci] += v;   // สะสมคะแนนรวมด้วย
+      return { ...c, votes: v };
+    });
+
+    const hasVotes = dv.some(c => c.votes > 0);
+    if (!hasVotes) return { name, winner: null, counted: true, distVotes: dv };
+
+    const best = dv.reduce((a, b) => b.votes > a.votes ? b : a, dv[0]);
+    return { name, winner: best, counted: true, distVotes: dv };
+  });
+
+  // สร้าง cands ใหม่ด้วยคะแนนรวมจาก districts (ไม่ใช้ตัวเลขจาก Sheet candidates)
+  const candsWithReal = cands.map((c, i) => ({ ...c, votes: totals[i] }))
+                             .sort((a, b) => b.votes - a.votes);
+
+  const total = districtData.length;
+  return { cands: candsWithReal, counted, total, distWin, updated: new Date() };
 }
 function startSim(){
   clearInterval(simTimer);simStep=22;
