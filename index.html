@@ -1416,40 +1416,17 @@ async function loadSKGSheet(csvUrl){
 
 // ── THE MAIN SHEET LOADER ──
 async function loadGSheetURL() {
-  // ใส่ URL ที่ได้จากขั้นตอน Deploy Apps Script
-  const gasUrl = "https://script.google.com/macros/library/d/1QMLAX9hE4XTNwQdJH2s73tD0uUQywImfU2UQbUKoH_6YZWkQELOmp9rY/2"; 
+  const url=document.getElementById('gs-url').value.trim();
+  const distUrl=document.getElementById('gs-dist-url')?.value.trim();
+  const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
   
-  const statusEl = document.getElementById('sheet-status');
-  if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin" style="margin-right:4px"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg> กำลังโหลด...';statusEl.style.color='var(--t4)';}
-  showToast('กำลังดึงข้อมูลจาก Google Sheets...', 'saving');
-
-  try {
-    const res = await fetch(gasUrl);
-    const data = await res.json();
-
-    // Mapping ข้อมูลที่ได้จาก GAS เข้าสู่ตัวแปรในแอป
-    cands = data.cands;
-    districtData = data.districtData;
-    skgData = data.skgData;
-
-    // อัปเดตการแสดงผล
-    simStep = 60;
-    renderDash(getRealData());
-    if(Object.keys(skgData).length) renderSKGOverview();
-
-    showToast('โหลดข้อมูลสำเร็จ ข้อมูลถูกซิงค์ตาม Google Sheets แล้ว');
-    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> โหลดสำเร็จ';statusEl.style.color='var(--g)';}
-    document.getElementById('sheet-panel').style.display='none';
-    
-    // ปลดล็อคปุ่มเซฟขึ้น Cloud
-    ['fb-save-btn','fb-save-btn2'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
-
-  } catch (e) {
-    showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
-    if(statusEl){statusEl.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> ล้มเหลว';statusEl.style.color='var(--red)';}
-    console.error(e);
+  const statusEl=document.getElementById('sheet-status');
+  if(!url){
+    document.getElementById('sheet-panel').style.display='block';
+    document.getElementById('sheet-panel-toggle').textContent='✕ ปิด';
+    document.getElementById('gs-url').focus();
+    return;
   }
-}
   
   clearInterval(simTimer);
   document.getElementById('live-txt').textContent='กำลังโหลด...';
