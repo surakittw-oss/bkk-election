@@ -1105,12 +1105,20 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) throw new Error('ไม่พบข้อมูล');
 
-    // หา header row — ต้องมี name หรือ party
+    // หา header row — ใช้ภาษาอังกฤษเป็นหลัก (name, party, no, color)
+    // หลีกเลี่ยงแถว description ภาษาไทย เช่น "ชื่อ-นามสกุล"
     let headerIdx=0;
-    for(let i=0;i<Math.min(lines.length,6);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase().replace(/[^a-zก-ฮ]/g,''));
-      if(cols.some(c=>c.includes('name')||c.includes('ชื่อ'))&&
-         cols.some(c=>c.includes('party')||c.includes('พรรค')||c.includes('สังกัด'))){
+    for(let i=0;i<Math.min(lines.length,8);i++){
+      const raw=parseCSVLine(lines[i]).map(c=>(c||'').trim().toLowerCase());
+      // ต้องมีคำ English สั้นๆ เช่น "name", "no", "party", "color"
+      const hasEngName  = raw.some(c=>c==='name'||c==='ชื่อ'||c.startsWith('name'));
+      const hasEngParty = raw.some(c=>c==='party'||c==='พรรค'||c.startsWith('party'));
+      const hasNo       = raw.some(c=>c==='no'||c==='ลำดับ'||c==='#');
+      // แถว description จะยาวกว่า เช่น "ชื่อ-นามสกุล", "สังกัด / พรรค"
+      // กรอง: ถ้า cell แรกที่ไม่ว่างยาวเกิน 10 ตัวอักษร = description row
+      const firstCell = raw.find(c=>c.length>0)||'';
+      if(firstCell.length>10) continue;
+      if((hasEngName&&hasEngParty)||hasNo){
         headerIdx=i;break;
       }
     }
