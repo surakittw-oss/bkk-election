@@ -1124,6 +1124,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     // header-based mapping — ไม่ขึ้นกับลำดับ column
     const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
     const getIdx=(tokens)=>hdr.findIndex(h=>tokens.some(t=>h.includes(t)));
+    const iNo    =getIdx(['no','ลำดับ','#']);
     const iName  =getIdx(['name','ชื่อ']);
     const iParty =getIdx(['party','พรรค','สังกัด']);
     const iVotes =getIdx(['vote','คะแนน']);   // -1 ถ้าไม่มีคอลัมน์ votes ก็ได้
