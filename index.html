@@ -1105,20 +1105,19 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) throw new Error('ไม่พบข้อมูล');
 
-    // หา header row — ใช้ภาษาอังกฤษเป็นหลัก (name, party, no, color)
-    // หลีกเลี่ยงแถว description ภาษาไทย เช่น "ชื่อ-นามสกุล"
+    // หา header row — ต้องเป็นแถว English header จริงๆ
+    // ข้าม: title row (ยาว), description row ภาษาไทย
     let headerIdx=0;
     for(let i=0;i<Math.min(lines.length,8);i++){
-      const raw=parseCSVLine(lines[i]).map(c=>(c||'').trim().toLowerCase());
-      // ต้องมีคำ English สั้นๆ เช่น "name", "no", "party", "color"
-      const hasEngName  = raw.some(c=>c==='name'||c==='ชื่อ'||c.startsWith('name'));
-      const hasEngParty = raw.some(c=>c==='party'||c==='พรรค'||c.startsWith('party'));
-      const hasNo       = raw.some(c=>c==='no'||c==='ลำดับ'||c==='#');
-      // แถว description จะยาวกว่า เช่น "ชื่อ-นามสกุล", "สังกัด / พรรค"
-      // กรอง: ถ้า cell แรกที่ไม่ว่างยาวเกิน 10 ตัวอักษร = description row
-      const firstCell = raw.find(c=>c.length>0)||'';
-      if(firstCell.length>10) continue;
-      if((hasEngName&&hasEngParty)||hasNo){
+      const raw=parseCSVLine(lines[i]).map(c=>(c||'').trim());
+      const rawL=raw.map(c=>c.toLowerCase());
+      // เงื่อนไข 1: ต้องมี cell ที่เป็น "name" หรือ "no" ตรงๆ (case-insensitive)
+      const hasName  = rawL.some(c=>c==='name');
+      const hasNo    = rawL.some(c=>c==='no');
+      const hasParty = rawL.some(c=>c==='party');
+      // เงื่อนไข 2: ต้องมี cell สั้นๆ ที่เป็น English (ไม่ใช่ description ยาวๆ)
+      const shortEngCells = raw.filter(c=>c.length>0&&c.length<=10&&/^[a-zA-Z_#]+$/.test(c));
+      if((hasName||hasNo)&&(hasParty||shortEngCells.length>=2)){
         headerIdx=i;break;
       }
     }
@@ -1137,6 +1136,14 @@ async function loadFromCSVUrl(csvUrl,lbl){
       const nm=(r[iName]||'').replace(/^"+|"+$/g,'').trim();
       if(!nm||nm.length>50) return false;
       if(nm.startsWith('รวม')||nm.startsWith('📋')) return false;
+      // กรอง description row เช่น "ชื่อ-นามสกุล"
+      if(nm.includes('-')&&nm.includes('สกุล')) return false;
+      if(nm==='ชื่อ'||nm==='name') return false;
+      // ถ้า iNo >= 0 ตรวจว่า No column เป็นตัวเลข หรือว่างเปล่า
+      if(iNo>=0){
+        const noVal=(r[iNo]||'').replace(/^"+|"+$/g,'').trim();
+        if(noVal&&isNaN(parseInt(noVal))&&noVal.length>3) return false;
+      }
       return true;
     });
 
@@ -1184,9 +1191,15 @@ async function loadDistrictSheet(url){
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) return;
     let distHdrIdx=0;
-    for(let i=0;i<Math.min(lines.length,5);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase());
-      if(cols.some(c=>c.includes('district'))&&cols.some(c=>c.includes('counted'))){distHdrIdx=i;break;}
+    for(let i=0;i<Math.min(lines.length,8);i++){
+      const raw=parseCSVLine(lines[i]).map(c=>(c||'').trim());
+      const rawL=raw.map(c=>c.toLowerCase());
+      // ต้องมี "district" และ "counted" เป็น cell สั้นๆ (ไม่ใช่ description)
+      const hasDistrict = rawL.some(c=>c==='district'||c==='เขต');
+      const hasCounted  = rawL.some(c=>c==='counted');
+      const firstCell   = raw.find(c=>c.length>0)||'';
+      if(firstCell.length>15) continue; // ข้าม title row
+      if(hasDistrict&&hasCounted){distHdrIdx=i;break;}
     }
     const header=parseCSVLine(lines[distHdrIdx]).map(h=>(h||'').toLowerCase().trim());
     districtData=lines.slice(distHdrIdx+1).map(parseCSVLine).filter(r=>{
