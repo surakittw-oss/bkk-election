@@ -1,27 +1,17 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BKKVote 2568 — ผลการเลือกตั้งผู้ว่า กทม</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
 /* ════ TOKENS ════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Navy-dark WeVis palette */
-  --bg0:   #080e14;
-  --bg1:   #0e1621;
-  --bg2:   #131f2e;
-  --bg3:   #1a2840;
-  --bg4:   #243348;
-  --line:  #2a3a52;
-  --line2: #1e2d42;
+  /* Charcoal gray — เทาดำ ไม่มี navy */
+  --bg0:   #111213;
+  --bg1:   #191a1b;
+  --bg2:   #1f2021;
+  --bg3:   #272829;
+  --bg4:   #303132;
+  --line:  #3a3b3d;
+  --line2: #262728;
   /* Text */
-  --t1:#eef2f7; --t2:#b8c5d3; --t3:#6b82a0; --t4:#3d506a;
+  --t1:#f0f0f2; --t2:#c6c6cc; --t3:#898993; --t4:#56565e;
   /* Accent green */
   --g:  #00c896; --g2:#00a67a; --g3:#008f69; --gd:rgba(0,200,150,.12);
   /* Candidate palette (dark-friendly) */
@@ -34,321 +24,202 @@
   --sh3:0 8px 40px rgba(0,0,0,.7);
 }
 html{overflow-x:hidden;scroll-behavior:smooth}
-body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg0);color:var(--t2);font-size:13px;line-height:1.5;min-height:100vh}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg0);color:var(--t2);font-size:11px;line-height:1.55;min-height:100vh}
 img{display:block;max-width:100%}
 button,input,select,textarea{font-family:inherit}
-code{font-family:'IBM Plex Mono',monospace;font-size:10px}
+code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 
 /* ════ TOPBAR ════ */
-.topbar{
-  position:sticky;top:0;z-index:200;
-  height:50px;
-  background:rgba(8,14,20,.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line2);
-  display:flex;align-items:center;padding:0 20px;gap:12px;
-}
+.topbar{position:sticky;top:0;z-index:200;height:54px;background:rgba(17,17,18,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);display:flex;align-items:center;padding:0 20px;gap:12px;}
 .tb-logo{display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
-.tb-logo-mark{
-  width:26px;height:26px;border-radius:6px;
-  background:linear-gradient(135deg,var(--g3),var(--g));
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0
-}
+.tb-logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--g3),var(--g));display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .tb-logo-mark svg{width:14px;height:14px}
-.tb-brand{font-size:14px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.tb-brand{font-size:11px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
 .tb-brand span{color:var(--g);font-weight:300}
 .tb-sep{width:1px;height:18px;background:var(--line);flex-shrink:0}
 .tb-subtitle{font-size:11px;color:var(--t4);white-space:nowrap}
-/* pills */
 .tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
-.live-badge{
-  display:flex;align-items:center;gap:5px;
-  padding:3px 10px;
-  background:var(--gd);border:1px solid var(--g3);
-  border-radius:20px;font-size:10px;font-weight:700;
-  color:var(--g);white-space:nowrap
-}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:blink 1.6s infinite}
+.live-badge{display:flex;align-items:center;gap:5px;padding:3px 10px;background:var(--gd);border:1px solid var(--g3);border-radius:20px;font-size:11px;font-weight:700;color:var(--g);white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink 1.6s infinite}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .spin{animation:spin 1s linear infinite}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.15;transform:scale(2.2)}}
-.fb-badge{
-  display:flex;align-items:center;gap:4px;
-  padding:3px 8px;border:1px solid var(--line);
-  border-radius:20px;font-size:10px;color:var(--t3)
-}
-.fb-dot{width:5px;height:5px;border-radius:50%;background:var(--t4);flex-shrink:0;transition:background .3s}
+.fb-badge{display:flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid var(--line);border-radius:20px;font-size:11px;color:var(--t3)}
+.fb-dot{width:6px;height:6px;border-radius:50%;background:var(--t4);flex-shrink:0;transition:background .3s}
 .fb-dot.connected{background:var(--g);box-shadow:0 0 6px var(--g)}
 .fb-dot.saving{background:var(--amber);animation:blink .7s infinite}
-.tb-nav-btn{
-  padding:4px 12px;border-radius:var(--r-sm);border:1px solid var(--line);
-  background:transparent;color:var(--t3);font-size:11px;font-weight:500;
-  cursor:pointer;transition:all .15s;white-space:nowrap
-}
+.tb-nav-btn{padding:5px 13px;border-radius:var(--r-sm);border:1px solid var(--line);background:transparent;color:var(--t3);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
 .tb-nav-btn:hover{border-color:var(--t3);color:var(--t1);background:var(--bg3)}
 .tb-nav-btn.on{background:var(--bg3);color:var(--t1);border-color:var(--line)}
-.user-btn{
-  display:flex;align-items:center;gap:5px;
-  padding:3px 9px 3px 3px;border:1px solid var(--line);
-  border-radius:20px;background:transparent;color:var(--t3);
-  font-size:11px;cursor:pointer;transition:all .15s
-}
+.user-btn{display:flex;align-items:center;gap:5px;padding:3px 9px 3px 3px;border:1px solid var(--line);border-radius:20px;background:transparent;color:var(--t3);font-size:11px;cursor:pointer;transition:all .15s}
 .user-btn:hover{background:var(--bg3)}
-.uav{width:22px;height:22px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
-.ham{display:none;width:30px;height:30px;border:1px solid var(--line);border-radius:var(--r-sm);background:transparent;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:3px}
-.ham span{width:12px;height:1.5px;background:var(--t3);border-radius:1px;display:block}
+.uav{width:24px;height:24px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.ham{display:none;width:32px;height:32px;border:1px solid var(--line);border-radius:var(--r-sm);background:transparent;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.ham span{width:14px;height:1.5px;background:var(--t3);border-radius:1px;display:block}
 
-/* ════ MAIN CONTENT ════ */
+/* ════ PAGES ════ */
 .page{display:none}
 .page.on{display:block}
 
-/* ─ DASHBOARD ─ */
-.dashboard{max-width:1400px;margin:0 auto;padding:16px 20px}
+/* ── DASHBOARD ── */
+.dashboard{max-width:1440px;margin:0 auto;padding:16px 20px}
 
-/* ── HERO ROW — stats + winner ── */
-.hero-row{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr 280px;
-  gap:10px;
-  margin-bottom:14px
-}
-/* stat card */
-.sc{
-  background:var(--bg2);border:1px solid var(--line2);
-  border-radius:var(--r);padding:14px 16px;
-  position:relative;overflow:hidden
-}
-.sc::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--g) 0%,transparent 100%);
-  opacity:.5
-}
-.sc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t4);margin-bottom:6px}
-.sc-val{font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--t1);line-height:1}
+/* ── HERO ROW ── */
+.hero-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 290px;gap:10px;margin-bottom:14px}
+.sc{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g) 0%,transparent 100%);opacity:.5}
+.sc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t4);margin-bottom:6px}
+.sc-val{font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--t1);line-height:1}
 .sc-val.green{color:var(--g)}
-.sc-sub{font-size:10px;color:var(--t4);margin-top:3px}
-.sc-prog{height:2px;background:var(--bg4);border-radius:1px;margin-top:8px;overflow:hidden}
-.sc-prog-f{height:100%;background:var(--g);border-radius:1px;transition:width 1s ease}
-.sc-meta{display:flex;justify-content:space-between;font-size:9px;color:var(--t4);margin-top:3px}
+.sc-sub{font-size:12px;color:var(--t4);margin-top:3px}
+.sc-prog{height:3px;background:var(--bg4);border-radius:2px;margin-top:8px;overflow:hidden}
+.sc-prog-f{height:100%;background:var(--g);border-radius:2px;transition:width 1s ease}
+.sc-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--t4);margin-top:3px}
 
 /* winner card */
-.winner-card{
-  background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);
-  border:1px solid var(--line);
-  border-radius:var(--r);padding:14px;
-  position:relative;overflow:hidden;
-  grid-row:1/3
-}
-.winner-card::after{
-  content:'';position:absolute;right:-30px;top:-30px;
-  width:120px;height:120px;border-radius:50%;
-  background:radial-gradient(circle,rgba(0,200,150,.08) 0%,transparent 70%);
-}
-.wc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.winner-card{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid var(--line);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;grid-row:1/3}
+.winner-card::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,160,.09) 0%,transparent 70%);}
+.wc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:5px}
 .wc-lbl::after{content:'';flex:1;height:1px;background:var(--g3);opacity:.3}
 .wc-av{
-  width:72px;height:72px;border-radius:50%;
-  border:2px solid var(--g3);overflow:hidden;
-  background:var(--bg4);margin-bottom:10px;
-  display:flex;align-items:center;justify-content:center;font-size:0;
-  box-shadow:0 0 20px rgba(0,200,150,.15)
-}
-.wc-name{font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;margin-bottom:3px}
-.wc-party{font-size:11px;color:var(--t3);margin-bottom:10px}
-.wc-votes{font-size:18px;font-weight:800;color:var(--g);letter-spacing:-.5px}
-.wc-pct{font-size:10px;color:var(--t3);margin-top:2px}
+  width:94px;height:94px;border-radius:50%;border:2px solid var(--g3);overflow:hidden;background:var(--bg4);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15)}
+.wc-name{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;margin-bottom:3px}
+.wc-party{font-size:13px;color:var(--t3);margin-bottom:10px}
+.wc-votes{font-size:20px;font-weight:800;color:var(--g);letter-spacing:-.5px}
+.wc-pct{font-size:12px;color:var(--t3);margin-top:2px}
 .wc-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:8px;overflow:hidden}
 .wc-bar-f{height:100%;background:var(--g);border-radius:1px;transition:width .8s ease}
 
-/* ── MIDDLE ROW — district map + chart ── */
-.middle-row{
-  display:grid;
-  grid-template-columns:1fr 320px;
-  gap:10px;margin-bottom:14px
-}
-/* map card */
+/* ── MIDDLE ROW ── */
+.middle-row{display:grid;grid-template-columns:1fr 320px;gap:10px;margin-bottom:14px}
 .map-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
-.map-card-hd{
-  padding:10px 16px;border-bottom:1px solid var(--line2);
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;background:var(--bg1)
-}
-.map-card-title{font-size:11px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:8px}
-.map-counted{font-size:11px;font-weight:700;color:var(--g)}
+.map-card-hd{padding:10px 16px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg1)}
+.map-card-title{font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:8px}
+.map-counted{font-size:13px;font-weight:700;color:var(--g)}
 .map-card-body{padding:12px;flex:1}
 
 /* district grid */
-.dgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-@media(min-width:700px){.dgrid{grid-template-columns:repeat(8,1fr)}}
-@media(min-width:1000px){.dgrid{grid-template-columns:repeat(10,1fr)}}
-.dp{
-  border:1px solid var(--line2);border-radius:6px;
-  padding:7px 8px;cursor:pointer;
-  background:var(--bg3);position:relative;overflow:hidden;
-  transition:all .12s
-}
-.dp:hover{transform:translateY(-1px);box-shadow:var(--sh1);z-index:1}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+.dp{border:1px solid var(--line2);border-radius:6px;padding:8px 10px;cursor:pointer;background:var(--bg3);position:relative;overflow:hidden;transition:all .12s;min-height:68px;display:flex;flex-direction:column;justify-content:center;}
+.dp:hover{transform:translateY(-1px);box-shadow:var(--sh1);z-index:1;border-color:var(--t3)}
 .dp.active{border-width:2px}
 .dp.unc{opacity:.25}
-.dp-stripe{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px 0 0 2px}
-.dp-nm{font-size:10px;font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px;margin-bottom:2px}
-.dp-winner{font-size:9px;color:var(--t3);padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dp-stripe{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:3px 0 0 3px}
+.dp-nm{font-size:13px;font-weight:600;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:7px;margin-bottom:2px}
+.dp-winner{font-size:12px;font-weight:500;color:var(--t3);padding-left:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* map legend */
 .map-legend{padding:10px 16px;border-top:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:10px;background:var(--bg1)}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3)}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* right column in middle */
+/* right col */
 .right-col{display:flex;flex-direction:column;gap:10px}
-/* chart card */
 .chart-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:12px}
-.card-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t4);margin-bottom:10px}
+.card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t4);margin-bottom:10px}
 .chart-box{height:170px}
-/* source card */
 .source-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:12px}
 .src-tabs{display:flex;gap:2px;background:var(--bg1);border-radius:var(--r-sm);padding:2px;border:1px solid var(--line2);margin-bottom:8px}
-.st{flex:1;text-align:center;padding:4px 6px;border-radius:4px;border:none;background:transparent;color:var(--t4);font-size:9px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.3px}
+.st{flex:1;text-align:center;padding:5px 6px;border-radius:4px;border:none;background:transparent;color:var(--t4);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.3px}
 .st.on{background:var(--bg4);color:var(--t1)}
-.inp{
-  background:var(--bg3);border:1px solid var(--line);
-  border-radius:var(--r-sm);padding:5px 8px;
-  color:var(--t1);font-size:11px;width:100%;transition:border .15s
-}
+.inp{background:var(--bg3);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 9px;color:var(--t1);font-size:11px;width:100%;transition:border .15s}
 .inp:focus{outline:none;border-color:var(--g)}
 .inp::placeholder{color:var(--t4)}
-.btn-p{padding:5px 11px;background:var(--g3);color:#fff;border:none;border-radius:var(--r-sm);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-p{padding:6px 12px;background:var(--g3);color:#fff;border:none;border-radius:var(--r-sm);font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;white-space:nowrap}
 .btn-p:hover{background:var(--g2)}
-.btn-s{padding:4px 9px;background:var(--bg4);color:var(--t2);border:1px solid var(--line);border-radius:var(--r-sm);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-s{padding:5px 10px;background:var(--bg4);color:var(--t2);border:1px solid var(--line);border-radius:var(--r-sm);font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-s:hover{border-color:var(--t3);color:var(--t1)}
-.hint{font-size:9px;color:var(--t4);margin-top:4px;line-height:1.6}
-.src-status{font-size:10px;color:var(--t4);margin-top:5px}
-
-/* sheet panel */
+.hint{font-size:10px;color:var(--t4);margin-top:4px;line-height:1.6}
+.src-status{font-size:11px;color:var(--t4);margin-top:5px}
 .sheet-panel{display:none;margin-top:8px}
-.sheet-row{display:grid;grid-template-columns:54px 1fr;gap:5px;align-items:center;margin-bottom:5px}
-.sheet-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t4)}
+.sheet-row{display:grid;grid-template-columns:56px 1fr;gap:6px;align-items:center;margin-bottom:6px}
+.sheet-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t4)}
 
-/* ── BOTTOM ROW — candidate list ── */
+/* ── CANDIDATE LIST ── */
 .bottom-row{margin-bottom:20px}
 .cands-card{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden}
-.cands-card-hd{
-  padding:10px 20px;border-bottom:1px solid var(--line2);
-  display:flex;align-items:center;gap:12px;background:var(--bg1)
-}
-.cands-card-title{font-size:11px;font-weight:700;color:var(--t1)}
-.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0;border-top:none}
-/* candidate item */
-.ci{
-  display:flex;align-items:center;gap:10px;
-  padding:12px 20px;cursor:pointer;
-  border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
-  transition:background .12s;position:relative;overflow:hidden
-}
-.ci::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  transition:opacity .15s;opacity:0
-}
+.cands-card-hd{padding:10px 20px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:12px;background:var(--bg1)}
+.cands-card-title{font-size:13px;font-weight:700;color:var(--t1)}
+.cands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0;border-top:none}
+.ci{display:flex;align-items:center;gap:14px;padding:16px 24px;cursor:pointer;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transition:background .12s;position:relative;overflow:hidden}
+.ci::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;transition:opacity .15s;opacity:0}
 .ci:hover{background:var(--bg3)}
 .ci:hover::before{opacity:1}
-.ci-rank{font-size:12px;font-weight:700;color:var(--t4);width:18px;text-align:right;flex-shrink:0}
+.ci-rank{font-size:15px;font-weight:700;color:var(--t4);width:20px;text-align:right;flex-shrink:0}
 .ci-av{
-  width:40px;height:40px;border-radius:50%;overflow:hidden;
-  border:1.5px solid var(--line);background:var(--bg4);
-  display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0
-}
-.ci-av.r1{width:48px;height:48px;border-color:var(--g);box-shadow:0 0 12px rgba(0,200,150,.2)}
+  width:62px;height:62px;border-radius:50%;overflow:hidden;border:1.5px solid var(--line);background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0;flex-shrink:0}
+.ci-av.r1{width:76px;height:76px;border-color:var(--g);box-shadow:0 0 12px rgba(34,211,160,.2)}
 .ci-info{flex:1;min-width:0}
-.ci-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ci-party{font-size:10px;color:var(--t3);margin-top:1px}
-.ci-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:5px;overflow:hidden}
-.ci-bar-f{height:100%;border-radius:1px;transition:width .8s ease}
-.ci-score{text-align:right;flex-shrink:0;min-width:64px}
-.ci-votes{font-size:11px;font-weight:700;color:var(--t1)}
-.ci-pct{font-size:10px;color:var(--t3);margin-top:1px}
+.ci-name{font-size:16px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-party{font-size:13px;color:var(--t3);margin-top:2px}
+.ci-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:6px;overflow:hidden}
+.ci-bar-f{height:100%;border-radius:2px;transition:width .8s ease}
+.ci-score{text-align:right;flex-shrink:0;min-width:70px}
+.ci-votes{font-size:15px;font-weight:700;color:var(--t1)}
+.ci-pct{font-size:13px;color:var(--t3);margin-top:2px}
 .ci-medal{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 
-/* ── DETAIL PANEL overlay ── */
-.detail-overlay{
-  position:fixed;right:0;top:50px;bottom:0;
-  width:340px;background:var(--bg2);
-  border-left:1px solid var(--line);
-  transform:translateX(100%);transition:transform .25s ease;
-  z-index:150;display:flex;flex-direction:column;overflow:hidden
-}
+/* ── DETAIL OVERLAY ── */
+.detail-overlay{position:fixed;right:0;top:54px;bottom:0;width:360px;background:var(--bg2);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .25s ease;z-index:150;display:flex;flex-direction:column;overflow:hidden}
 .detail-overlay.open{transform:translateX(0)}
-.detail-hd{
-  padding:12px 16px;border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;flex-shrink:0
-}
-.detail-title{font-size:13px;font-weight:700;color:var(--t1)}
-.detail-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;line-height:1}
+.detail-hd{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.detail-title{font-size:14px;font-weight:700;color:var(--t1)}
+.detail-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px;line-height:1}
 .detail-body{flex:1;overflow-y:auto;padding:12px 16px}
 .detail-body::-webkit-scrollbar{width:3px}
 .detail-body::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
-
-/* district detail rows */
-.dd-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line2)}
+.dd-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line2)}
 .dd-row:last-child{border-bottom:none}
-.dd-av{width:22px;height:22px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
+.dd-av{width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
 .dd-bar-wrap{flex:1;min-width:0}
-.dd-name{font-size:11px;color:var(--t1);font-weight:500}
-.dd-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:3px;overflow:hidden}
-.dd-bar-f{height:100%;border-radius:1px}
-.dd-score{text-align:right;min-width:58px;flex-shrink:0}
-.dd-votes{font-size:10px;font-weight:600;color:var(--t1)}
-.dd-pct{font-size:9px;color:var(--t4)}
-
-/* skg section */
+.dd-name{font-size:13px;color:var(--t1);font-weight:500}
+.dd-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:4px;overflow:hidden}
+.dd-bar-f{height:100%;border-radius:2px}
+.dd-score{text-align:right;min-width:64px;flex-shrink:0}
+.dd-votes{font-size:12px;font-weight:600;color:var(--t1)}
+.dd-pct{font-size:11px;color:var(--t4)}
 .skg-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.skg-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t4);margin-bottom:8px}
-.skg-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--line2)}
+.skg-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t4);margin-bottom:8px}
+.skg-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line2)}
 .skg-row:last-child{border-bottom:none}
-.skg-av{width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
+.skg-av{width:26px;height:26px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:0}
 .skg-info{flex:1;min-width:0}
-.skg-name{font-size:11px;color:var(--t1)}
-.skg-party{font-size:9px;color:var(--t4)}
-.skg-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:2px;overflow:hidden}
-.skg-bar-f{height:100%;border-radius:1px}
-.skg-votes{font-size:10px;font-weight:500;color:var(--t1);flex-shrink:0}
-.skg-elected{font-size:8px;padding:1px 4px;border-radius:3px;background:rgba(0,200,150,.15);color:var(--g);font-weight:600;display:inline-block;margin-top:1px}
+.skg-name{font-size:13px;color:var(--t1)}
+.skg-party{font-size:11px;color:var(--t4)}
+.skg-bar{height:2px;background:var(--bg4);border-radius:2px;margin-top:3px;overflow:hidden}
+.skg-bar-f{height:100%;border-radius:2px}
+.skg-votes{font-size:12px;font-weight:500;color:var(--t1);flex-shrink:0}
+.skg-elected{font-size:11px;padding:1px 5px;border-radius:3px;background:rgba(34,211,160,.15);color:var(--g);font-weight:600;display:inline-block;margin-top:2px}
 
 /* ── CMS MODAL ── */
 .cms-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
 .cms-modal.open{display:flex}
 .cms-box{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);width:100%;max-width:760px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
 .cms-hd{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.cms-hd-title{font-size:14px;font-weight:700;color:var(--t1)}
-.cms-hd-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px}
+.cms-hd-title{font-size:11px;font-weight:700;color:var(--t1)}
+.cms-hd-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px}
 .cms-tabs{display:flex;padding:0 18px;border-bottom:1px solid var(--line);gap:2px;flex-shrink:0}
-.cms-tab{padding:8px 14px;border:none;background:transparent;color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.cms-tab{padding:8px 14px;border:none;background:transparent;color:var(--t3);font-size:11px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
 .cms-tab.on{color:var(--g);border-bottom-color:var(--g)}
 .cms-body{flex:1;overflow-y:auto;padding:16px 18px}
 .cms-body::-webkit-scrollbar{width:3px}
 .cms-body::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
-/* table */
 .ct{width:100%;border-collapse:collapse}
-.ct th{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-.ct td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.ct th{font-size:10px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.5px;padding:7px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.ct td{padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
 .ct tr:last-child td{border-bottom:none}
 .ct tr:hover td{background:var(--bg3)}
-.ci-inp{background:var(--bg3);border:1px solid transparent;border-radius:4px;padding:3px 7px;color:var(--t1);font-size:11px;font-family:inherit;width:100%;transition:border .15s}
+.ci-inp{background:var(--bg3);border:1px solid transparent;border-radius:4px;padding:4px 8px;color:var(--t1);font-size:11px;font-family:inherit;width:100%;transition:border .15s}
 .ci-inp:focus{outline:none;border-color:var(--g)}
 .drag-h{cursor:grab;color:var(--t4);font-size:11px;user-select:none}
-.swatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--line);cursor:pointer;display:inline-block;transition:transform .1s}
+.swatch{width:20px;height:20px;border-radius:4px;border:1px solid var(--line);cursor:pointer;display:inline-block;transition:transform .1s}
 .swatch:hover{transform:scale(1.15)}
-.av-th{width:26px;height:26px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;cursor:pointer;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:0}
-.pt-th{width:22px;height:22px;border-radius:4px;overflow:hidden;background:var(--bg3);flex-shrink:0;cursor:pointer;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t4)}
-.btn-del{background:transparent;color:var(--red);border:1px solid rgba(248,113,113,.2);padding:3px 8px;border-radius:4px;font-size:10px;cursor:pointer}
-.add-row{display:flex;align-items:center;gap:5px;padding:8px;color:var(--t3);cursor:pointer;font-size:11px;border-top:1px solid var(--line);transition:color .15s}
+.av-th{width:28px;height:28px;border-radius:50%;overflow:hidden;background:var(--bg3);flex-shrink:0;cursor:pointer;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:0}
+.pt-th{width:24px;height:24px;border-radius:4px;overflow:hidden;background:var(--bg3);flex-shrink:0;cursor:pointer;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--t4)}
+.btn-del{background:transparent;color:var(--red);border:1px solid rgba(248,113,113,.2);padding:4px 9px;border-radius:4px;font-size:11px;cursor:pointer}
+.add-row{display:flex;align-items:center;gap:5px;padding:9px;color:var(--t3);cursor:pointer;font-size:11px;border-top:1px solid var(--line);transition:color .15s}
 .add-row:hover{color:var(--g)}
-.fb-save-btn{
-  background:linear-gradient(135deg,var(--g3),var(--g2));color:#fff;
-  border:none;border-radius:var(--r-sm);padding:6px 14px;
-  font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;
-  display:flex;align-items:center;gap:5px
-}
+.fb-save-btn{background:linear-gradient(135deg,var(--g3),var(--g2));color:#fff;border:none;border-radius:var(--r-sm);padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:5px}
 .fb-save-btn:hover{opacity:.85}
 .fb-save-btn:disabled{opacity:.35;cursor:default}
 
@@ -359,46 +230,46 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .cp-c:hover,.cp-c.sel{transform:scale(1.2);border-color:var(--t1)}
 .cp-custom{display:flex;gap:4px;align-items:center}
 .cp-custom input[type=color]{width:22px;height:20px;border:none;background:none;cursor:pointer;padding:0;border-radius:3px}
-.cp-hex{flex:1;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--t1);font-size:10px;font-family:monospace}
+.cp-hex{flex:1;background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:3px 5px;color:var(--t1);font-size:11px;font-family:monospace}
 
 /* ── IMAGE / LOGO MODAL ── */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:700;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
 .modal-bg.open{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;width:100%;max-width:380px;max-height:90vh;overflow-y:auto}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.modal-title{font-size:13px;font-weight:700;color:var(--t1)}
-.modal-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px}
+.modal-title{font-size:11px;font-weight:700;color:var(--t1)}
+.modal-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:11px}
 .modal-prev{width:64px;height:64px;border-radius:50%;border:2px solid var(--line);margin:0 auto 10px;display:block;background:var(--bg3)}
 .modal-prev.rect{border-radius:var(--r-sm)}
 .drop-z{border:1.5px dashed var(--line);border-radius:var(--r-sm);padding:12px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:8px}
 .drop-z:hover,.drop-z.dz-on{border-color:var(--g)}
-.drop-z p{font-size:10px;color:var(--t4);margin-top:2px}
+.drop-z p{font-size:11px;color:var(--t4);margin-top:2px}
 .url-row{position:relative;margin-bottom:7px}
-.url-apply{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--g3);color:#fff;border:none;border-radius:4px;font-size:10px;font-weight:600;padding:2px 7px;cursor:pointer}
+.url-apply{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--g3);color:#fff;border:none;border-radius:4px;font-size:10px;font-weight:600;padding:3px 8px;cursor:pointer}
 .modal-actions{display:flex;gap:6px;margin-top:10px}
-.gdrive-note{font-size:9px;color:var(--t4);padding:6px 9px;background:var(--bg3);border-radius:var(--r-sm);line-height:1.6;margin-bottom:8px}
+.gdrive-note{font-size:10px;color:var(--t4);padding:6px 9px;background:var(--bg3);border-radius:var(--r-sm);line-height:1.6;margin-bottom:8px}
 
 /* ── CANDIDATE DETAIL MODAL ── */
 .cand-modal .modal-box{max-width:500px}
 .cd-hero{background:var(--bg3);border-radius:var(--r);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
 .cd-hero-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
-.cd-av{width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
-.cd-rank{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:8px;margin-bottom:6px}
-.cd-name{font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2}
+.cd-av{width:88px;height:88px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
+.cd-rank{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;margin-bottom:6px}
+.cd-name{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2}
 .cd-party{font-size:11px;color:var(--t3);margin-top:3px}
 .cd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
 .cd-stat{background:var(--bg3);border:1px solid var(--line2);border-radius:var(--r-sm);padding:10px;text-align:center}
-.cd-stat-val{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
-.cd-stat-lbl{font-size:9px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.cd-stat-val{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.cd-stat-lbl{font-size:11px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
 .cd-bar-section{margin-bottom:12px}
-.cd-bar-lbl{font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.cd-bar-lbl{font-size:10px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
 .cd-bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.cd-bar-label{font-size:11px;color:var(--t2);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-bar-label{font-size:13px;color:var(--t2);width:110px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cd-bar-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
 .cd-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
-.cd-bar-pct{font-size:10px;font-weight:500;color:var(--t2);width:32px;text-align:right;flex-shrink:0}
-.cd-dist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:3px;max-height:100px;overflow-y:auto}
-.cd-dist-pill{background:var(--bg3);border:1px solid var(--line2);border-radius:4px;padding:3px 5px;font-size:9px;color:var(--t3);text-align:center}
+.cd-bar-pct{font-size:12px;font-weight:500;color:var(--t2);width:32px;text-align:right;flex-shrink:0}
+.cd-dist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:3px;max-height:100px;overflow-y:auto}
+.cd-dist-pill{background:var(--bg3);border:1px solid var(--line2);border-radius:4px;padding:3px 5px;font-size:10px;color:var(--t3);text-align:center}
 .cd-dist-pill.win{border-color:currentColor}
 
 /* ── IMPORT PAGE ── */
@@ -413,68 +284,90 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .drawer-bg{position:absolute;inset:0;background:rgba(0,0,0,.6)}
 .drawer-panel{position:absolute;top:0;right:0;width:260px;height:100%;background:var(--bg2);border-left:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
 .drawer-close{display:flex;justify-content:flex-end;margin-bottom:10px}
-.drawer-tab{width:100%;text-align:left;padding:9px 12px;border:none;background:transparent;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s}
+.drawer-tab{width:100%;text-align:left;padding:10px 12px;border:none;background:transparent;border-radius:var(--r-sm);font-size:11px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s}
 .drawer-tab:hover{background:var(--bg3)}
 
 /* ── SKG OVERVIEW ── */
 .skg-overview{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;margin-bottom:14px;display:none}
 .skg-ov-hd{padding:10px 20px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;background:var(--bg1)}
-.skg-ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0;border-top:none}
-.skg-mini{padding:12px 16px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);cursor:pointer;transition:background .12s;min-width:160px}
+.skg-ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0;border-top:none}
+.skg-mini{padding:16px 20px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);cursor:pointer;transition:background .12s;min-width:160px}
 .skg-mini:hover{background:var(--bg3)}
-.skg-mini-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.skg-mini-name{font-size:12px;font-weight:700;color:var(--t1)}
-.skg-mini-tag{font-size:9px;color:var(--g)}
-.skg-mini-row{display:flex;align-items:center;gap:4px;margin-bottom:2px}
-.skg-mini-av{width:14px;height:14px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
-.skg-mini-cand{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skg-mini-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.skg-mini-name{font-size:15px;font-weight:700;color:var(--t1)}
+.skg-mini-tag{font-size:13px;color:var(--g)}
+.skg-mini-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.skg-mini-av{width:22px;height:22px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
+.skg-mini-cand{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── RESPONSIVE ── */
-@media(max-width:1100px){
+@media(max-width:1280px){
   .hero-row{grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:auto auto}
-  .winner-card{grid-column:1/3;grid-row:2;display:flex;gap:16px;align-items:center}
+  .winner-card{grid-column:1/3;grid-row:2;display:flex;gap:20px;align-items:center}
   .wc-av{margin-bottom:0}
-  .dgrid{grid-template-columns:repeat(8,1fr)}
-  .middle-row{grid-template-columns:1fr 290px}
+  .middle-row{grid-template-columns:1fr 300px}
 }
-@media(max-width:860px){
+@media(max-width:960px){
   .hero-row{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto}
   .winner-card{grid-column:1/3;grid-row:3}
   .middle-row{grid-template-columns:1fr}
   .right-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .dgrid{grid-template-columns:repeat(6,1fr)}
+  .dgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
   .cands-grid{grid-template-columns:repeat(2,1fr)}
-  .detail-overlay{width:300px}
+  .detail-overlay{width:340px}
   .tb-nav-btn{display:none}
   .ham{display:flex}
   .tb-subtitle{display:none}
   .import-grid{grid-template-columns:1fr}
 }
-@media(max-width:580px){
+@media(max-width:640px){
   .dashboard{padding:10px 12px}
-  .hero-row{grid-template-columns:1fr 1fr;gap:7px}
-  .winner-card{grid-column:1/3}
-  .sc-val{font-size:20px}
-  .dgrid{grid-template-columns:repeat(5,1fr)}
+  .hero-row{grid-template-columns:1fr 1fr;gap:8px}
+  .winner-card{grid-column:1/3;flex-direction:column;text-align:center;gap:12px;padding:14px}
+  .sc-val{font-size:28px!important}
+  .sc{padding:12px 14px}
   .cands-grid{grid-template-columns:1fr}
-  .detail-overlay{width:100%;border-left:none;border-top:1px solid var(--line)}
+  .ci{padding:12px 16px;gap:10px}
+  .ci-av.r1{width:52px!important;height:52px!important}
+  .ci-av{width:44px!important;height:44px!important}
+  .ci-name{font-size:14px!important}
+  .ci-votes{font-size:13px!important}
+  .detail-overlay{width:100%;border-left:none;border-top:1px solid var(--line);top:auto;bottom:0;height:50vh;transform:translateY(100%)}
+  .detail-overlay.open{transform:translateY(0)}
   .right-col{grid-template-columns:1fr}
   .middle-row{grid-template-columns:1fr}
   .import-page{padding:14px 12px}
+  .import-grid{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px}
+  .dp{min-height:68px;padding:7px 9px}
+  .dp-nm{font-size:11px!important}
+  .wc-av{width:80px!important;height:80px!important}
+  .wc-name{font-size:17px!important}
+  .wc-votes{font-size:20px!important}
+  .topbar{height:50px;padding:0 12px}
+  .tb-brand{font-size:11px}
+  .skg-ov-grid{grid-template-columns:1fr}
+  .map-card-hd{flex-wrap:wrap;gap:6px}
 }
 @media(max-width:400px){
-  .dgrid{grid-template-columns:repeat(4,1fr)}
+  .dashboard{padding:8px}
   .hero-row{gap:6px}
+  .sc-val{font-size:28px!important}
   .sc{padding:10px 12px}
-  .sc-val{font-size:18px}
+  .ci{padding:10px}
+  .ci-av{width:40px!important;height:40px!important}
+  .ci-name{font-size:14px!important}
+  .dgrid{grid-template-columns:repeat(3,1fr);gap:4px}
+  .dp{min-height:68px;padding:6px 8px}
+  .dp-nm{font-size:11px!important}
 }
 
-/* ── TOAST NOTIFICATION ── */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--line);border-left:5px solid var(--g);color:var(--t1);padding:14px 18px;border-radius:var(--r);box-shadow:var(--sh3);font-size:14px;font-weight:600;z-index:1000;display:flex;align-items:center;gap:10px;transform:translateX(120%);transition:transform .3s cubic-bezier(0.175,0.885,0.32,1.275)}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--line);border-left:5px solid var(--g);color:var(--t1);padding:14px 18px;border-radius:var(--r);box-shadow:var(--sh3);font-size:11px;font-weight:600;z-index:1000;display:flex;align-items:center;gap:10px;transform:translateX(120%);transition:transform .3s cubic-bezier(0.175,0.885,0.32,1.275)}
 .toast.show{transform:translateX(0)}
 .toast.error{border-left-color:var(--red)}
 .toast.saving{border-left-color:var(--amber)}
-@media(max-width:580px){.toast{bottom:14px;right:14px;left:14px}}
+@media(max-width:580px){.toast{bottom:12px;right:12px;left:12px}}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
@@ -484,344 +377,8 @@ code{font-family:'IBM Plex Mono',monospace;font-size:10px}
 .sc:nth-child(2){animation-delay:.06s}
 .sc:nth-child(3){animation-delay:.09s}
 .sc:nth-child(4){animation-delay:.12s}
+
 </style>
-</head>
-<body>
-
-<!-- ════ TOPBAR ════ -->
-<header class="topbar">
-  <div class="tb-logo" id="logo-slot" onclick="openLogoModal()">
-    <div class="tb-logo-mark">
-      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 1L13 4.5V9.5L7 13L1 9.5V4.5L7 1Z" stroke="white" stroke-width="1.2" fill="none"/>
-        <circle cx="7" cy="7" r="2" fill="white"/>
-      </svg>
-    </div>
-    <span class="tb-brand">BKK<span>Vote</span></span>
-  </div>
-  <div class="tb-sep"></div>
-  <span class="tb-subtitle">ผลการเลือกตั้งผู้ว่าราชการกรุงเทพมหานคร</span>
-  <div class="tb-right">
-    <div class="live-badge"><span class="live-dot"></span><span id="live-txt">Live</span></div>
-    <div class="fb-badge"><span class="fb-dot" id="fb-dot"></span><span id="fb-status-txt">Firebase</span></div>
-    <button class="tb-nav-btn on" onclick="showPage('dashboard',this)">Dashboard</button>
-    <button class="tb-nav-btn" onclick="openCMS()">CMS</button>
-    <button class="tb-nav-btn" onclick="showPage('import',this)">นำเข้า</button>
-    <button class="user-btn">
-      <div class="uav" id="user-av">?</div>
-      <span id="user-name">ผู้ใช้</span>
-    </button>
-    <button class="ham" onclick="openDrawer()"><span></span><span></span><span></span></button>
-  </div>
-</header>
-
-<!-- ════ PAGES ════ -->
-
-<!-- ─── DASHBOARD ─── -->
-<div id="page-dashboard" class="page on">
-<div class="dashboard">
-
-  <!-- HERO ROW -->
-  <div class="hero-row">
-    <div class="sc">
-      <div class="sc-lbl">หน่วยนับแล้ว</div>
-      <div class="sc-val green" id="s-counted">—</div>
-      <div class="sc-sub" id="s-total">—</div>
-      <div class="sc-prog"><div class="sc-prog-f" id="prog" style="width:0%"></div></div>
-      <div class="sc-meta"><span id="p-pct">0%</span><span id="s-time">—</span></div>
-    </div>
-    <div class="sc">
-      <div class="sc-lbl">คะแนนรวม</div>
-      <div class="sc-val" id="s-votes" style="font-size:20px">—</div>
-      <div class="sc-sub">คะแนนเสียง</div>
-    </div>
-    <div class="sc">
-      <div class="sc-lbl">ผู้นำขณะนี้</div>
-      <div class="sc-val" id="s-leader" style="font-size:14px;letter-spacing:-.2px;line-height:1.3">—</div>
-      <div class="sc-sub" id="s-lpct">—</div>
-    </div>
-    <div class="sc">
-      <div class="sc-lbl">ความคืบหน้า</div>
-      <div class="sc-val" id="s-pct">—</div>
-      <div class="sc-sub" id="s-updtime">—</div>
-    </div>
-    <!-- winner -->
-    <div class="winner-card">
-      <div class="wc-lbl"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.29 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.29 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg> ผู้นำ</div>
-      <div id="w-avatar-wrap"><div class="wc-av"></div></div>
-      <div style="flex:1;min-width:0">
-        <div class="wc-name" id="w-name">รอข้อมูล</div>
-        <div class="wc-party" id="w-party-wrap">—</div>
-        <div class="wc-votes" id="w-votes">—</div>
-        <div class="wc-pct" id="w-pct">—</div>
-        <div class="wc-bar"><div class="wc-bar-f" id="w-bar" style="width:0%"></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MIDDLE ROW -->
-  <div class="middle-row">
-    <!-- MAP -->
-    <div class="map-card">
-      <div class="map-card-hd">
-        <div class="map-card-title">
-          50 เขต กรุงเทพมหานคร
-          <span class="map-counted" id="dist-counted-label">0/50</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span id="foot-src" style="font-size:10px;color:var(--t4)">Firebase</span>
-          <span id="upd-tag" style="font-size:10px;color:var(--t4)">—</span>
-          <button class="btn-s" onclick="refresh()" style="font-size:10px;padding:3px 8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 101 4.7"/><polyline points="3 3 3 9 9 9"/></svg></button>
-        </div>
-      </div>
-      <div class="map-card-body">
-        <div class="dgrid" id="dist-grid"></div>
-      </div>
-      <div class="map-legend" id="map-legend"></div>
-    </div>
-
-    <!-- RIGHT COL -->
-    <div class="right-col">
-      <!-- chart -->
-      <div class="chart-card">
-        <div class="card-label">กราฟเปรียบเทียบ</div>
-        <div class="chart-box"><canvas id="ch"></canvas></div>
-      </div>
-      <!-- source -->
-      <div class="source-card">
-        <div class="src-tabs">
-          <button class="st" onclick="setMode('mock',this)">จำลอง</button>
-          <button class="st" onclick="setMode('gsheet',this)">Sheets</button>
-          <button class="st on" onclick="setMode('firebase',this)">Firebase</button>
-          <button class="st" onclick="setMode('api',this)">API</button>
-        </div>
-        <div>
-          <div id="pm-mock" style="display:none"><span class="hint">จำลอง — อัปเดตทุก 5s</span></div>
-          <div id="pm-gsheet" style="display:none">
-            <div style="display:flex;gap:5px;align-items:center;margin-bottom:4px">
-              <button class="btn-p" onclick="loadGSheetURL()">โหลด</button>
-              <button class="btn-s" onclick="toggleSheetPanel()" id="sheet-panel-toggle"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
-              <span id="sheet-status" class="src-status">กรอก URL ก่อน</span>
-            </div>
-            <div id="sheet-panel" class="sheet-panel">
-              <div class="sheet-row"><span class="sheet-lbl">ผู้สมัคร</span><input class="inp" id="gs-url" placeholder="#gid=0"></div>
-              <div class="sheet-row"><span class="sheet-lbl">เขต</span><input class="inp" id="gs-dist-url" placeholder="#gid=..."></div>
-              <div class="sheet-row"><span class="sheet-lbl">สก.</span><input class="inp" id="gs-skg-url" placeholder="#gid=..."></div>
-              <div class="hint">คลิก tab Sheet → URL มี <code>#gid=</code></div>
-            </div>
-          </div>
-          <div id="pm-firebase">
-            <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-              <button class="btn-p" onclick="loadFromFirebase()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> โหลด</button>
-              <span id="fb-src-status" class="src-status">Real-time sync</span>
-            </div>
-          </div>
-          <div id="pm-api" style="display:none">
-            <div style="display:flex;gap:5px">
-              <input class="inp" id="api-url" placeholder="https://.../election.json" style="flex:1">
-              <button class="btn-p" onclick="loadAPI()">โหลด</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM — CANDIDATE LIST -->
-  <div class="bottom-row">
-    <div class="cands-card">
-      <div class="cands-card-hd">
-        <div class="cands-card-title">ผลคะแนนผู้สมัคร</div>
-        <span id="foot-time" style="font-size:10px;color:var(--t4)">—</span>
-      </div>
-      <div class="cands-grid" id="cand-list"></div>
-    </div>
-  </div>
-
-  <!-- SKG OVERVIEW -->
-  <div id="skg-overview-card" class="skg-overview">
-    <div class="skg-ov-hd">
-      <div style="font-size:11px;font-weight:700;color:var(--t1)">ผล สก. ภาพรวม</div>
-      <span id="skg-overview-meta" style="font-size:10px;color:var(--t4)"></span>
-    </div>
-    <div class="skg-ov-grid" id="skg-overview-body"></div>
-  </div>
-
-</div>
-</div>
-
-<!-- ─── IMPORT PAGE ─── -->
-<div id="page-import" class="page">
-<div class="import-page">
-  <div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:16px">นำเข้า / ส่งออก</div>
-  <div class="import-grid">
-    <div class="imp-card">
-      <div class="imp-card-title">นำเข้า JSON</div>
-      <textarea class="inp" id="imp-json" rows="5" placeholder='[{"name":"...","party":"...","votes":0}]' style="resize:vertical;font-family:monospace;font-size:10px"></textarea>
-      <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
-        <button class="btn-p" onclick="importJSON()">นำเข้า</button>
-        <button class="btn-s" onclick="pasteClip()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg> วาง</button>
-        <label class="btn-s" style="cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg><input type="file" accept=".csv,.json" onchange="readFile(this)" style="display:none"></label>
-      </div>
-    </div>
-    <div class="imp-card">
-      <div class="imp-card-title">ส่งออก</div>
-      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
-        <button class="btn-s" onclick="exportJSON()">⬇ JSON</button>
-        <button class="btn-s" onclick="exportCSV()">⬇ CSV</button>
-        <button class="btn-s" onclick="copyJSON()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg> คัดลอก</button>
-      </div>
-      <div id="exp-prev" style="background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:7px;font-family:monospace;font-size:10px;color:var(--t3);white-space:pre-wrap;max-height:100px;overflow-y:auto">—</div>
-    </div>
-  </div>
-  <div class="imp-card" style="margin-top:12px">
-    <div class="imp-card-title">Google Sheets</div>
-    <input class="inp" id="gs-url2" placeholder="Share Link" style="margin-bottom:6px">
-    <button class="btn-p" onclick="loadGSheetURL2()">โหลด</button>
-    <div class="hint" style="margin-top:4px">Name, Party, Votes, Color, AvatarURL, PartyLogoURL</div>
-  </div>
-</div>
-</div>
-
-<!-- ════ DETAIL OVERLAY ════ -->
-<div class="detail-overlay" id="detail-overlay">
-  <div class="detail-hd">
-    <div class="detail-title" id="detail-title">รายละเอียดเขต</div>
-    <button class="detail-close" onclick="closeDetail()">✕</button>
-  </div>
-  <div class="detail-body" id="detail-body"></div>
-</div>
-
-<!-- ════ CMS MODAL ════ -->
-<div id="cms-modal" class="cms-modal">
-  <div class="cms-box">
-    <div class="cms-hd">
-      <div class="cms-hd-title">จัดการ CMS</div>
-      <button class="cms-hd-close" onclick="closeCMS()">✕</button>
-    </div>
-    <div class="cms-tabs">
-      <button class="cms-tab on" onclick="showCMSTab('candidates',this)">ผู้สมัคร</button>
-      <button class="cms-tab" onclick="showCMSTab('firebase',this)">Firebase</button>
-      <button class="cms-tab" onclick="showCMSTab('settings',this)">ตั้งค่า</button>
-    </div>
-    <div class="cms-body">
-      <div id="cms-candidates">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:11px;color:var(--t3)">เพิ่ม แก้ไข ลบ จัดเรียง</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="btn-s" onclick="resetCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M3 12a9 9 0 101 4.7"/><polyline points="3 3 3 9 9 9"/></svg> รีเซ็ต</button>
-            <button class="btn-p" onclick="saveCands()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> บันทึก</button>
-            <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> Firebase</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="ct">
-            <thead><tr>
-              <th></th><th>#</th><th style="width:60px">รูป</th><th>ชื่อ</th>
-              <th style="width:60px">โลโก้</th><th>สังกัด</th>
-              <th style="width:80px">คะแนน</th>
-              <th style="width:28px">สี</th><th></th>
-            </tr></thead>
-            <tbody id="cand-tbody"></tbody>
-          </table>
-        </div>
-        <div class="add-row" onclick="addCand()"><span>+</span> เพิ่มผู้สมัคร</div>
-      </div>
-      <div id="cms-firebase" style="display:none">
-        <div style="background:var(--bg3);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px">
-          <div style="font-size:11px;font-weight:700;color:var(--t1);margin-bottom:6px">Firebase Realtime Database</div>
-          <div style="font-size:10px;color:var(--t3);margin-bottom:10px">bkk-election-vote-default-rtdb.asia-southeast1.firebasedatabase.app</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="fb-save-btn" onclick="saveToFirebase()" id="fb-save-btn2" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> บันทึกขึ้น Firebase</button>
-            <button class="btn-s" onclick="loadFromFirebase()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> โหลดจาก Firebase</button>
-          </div>
-        </div>
-      </div>
-      <div id="cms-settings" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div><label style="font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;display:block;margin-bottom:4px">หน่วยทั้งหมด</label><input class="inp" type="number" id="cfg-total" value="50" min="1"></div>
-          <div><label style="font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;display:block;margin-bottom:4px">ความเร็ว (s)</label><input class="inp" type="number" id="cfg-speed" value="5" min="1" max="60"></div>
-          <div><label style="font-size:9px;font-weight:600;color:var(--t4);text-transform:uppercase;display:block;margin-bottom:4px">ความแปรปรวน</label><select class="inp" id="cfg-var"><option value="low">น้อย</option><option value="mid" selected>กลาง</option><option value="high">มาก</option></select></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ IMAGE MODAL ════ -->
-<div id="img-modal" class="modal-bg">
-  <div class="modal-box">
-    <div class="modal-hd"><span class="modal-title" id="modal-title">เปลี่ยนรูป</span><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <img id="modal-preview" class="modal-prev" src="" style="display:none">
-    <div id="modal-preview-ph" class="modal-prev" style="display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--bg3)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-    <div class="drop-z" onclick="document.getElementById('file-input').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
-      <div style="font-size:16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><p>คลิกหรือลากวาง JPG PNG SVG</p>
-    </div>
-    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="fileChosen(this)">
-    <div class="url-row"><input class="inp" id="img-url-input" placeholder="URL รูปภาพ" oninput="urlPreview(this.value)"><button class="url-apply" onclick="applyURL()">ใช้</button></div>
-    <div class="gdrive-note">Google Drive: drive.google.com/thumbnail?id=FILE_ID&sz=s200</div>
-    <div class="modal-actions"><button class="btn-p" onclick="applyImage()">✓ ใช้รูปนี้</button><button class="btn-s" onclick="clearImage()">✕ ลบ</button></div>
-  </div>
-</div>
-
-<!-- ════ LOGO MODAL ════ -->
-<div id="logo-modal" class="modal-bg">
-  <div class="modal-box">
-    <div class="modal-hd"><span class="modal-title">Logo</span><button class="modal-close" onclick="closeLogoModal()">✕</button></div>
-    <div style="background:var(--bg3);border-radius:var(--r-sm);padding:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;min-height:48px">
-      <div id="logo-prev-inner"><div style="font-size:10px;color:var(--t4)">ยังไม่มี Logo</div></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;color:var(--t3)">
-      ขนาด<input type="range" id="logo-sz" min="20" max="52" value="30" oninput="logoSzChange(this.value)" style="flex:1;accent-color:var(--g)"><span id="logo-sz-label">30px</span>
-    </div>
-    <div class="drop-z" onclick="document.getElementById('logo-file').click()"><div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><p>PNG SVG JPG</p></div>
-    <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="logoFilePick(this)">
-    <div class="url-row"><input class="inp" id="logo-url" placeholder="URL..." oninput="logoUrlPrev(this.value)" style="padding-right:44px"><button class="url-apply" onclick="logoApplyUrl()">ใช้</button></div>
-    <div class="gdrive-note">Google Drive: drive.google.com/thumbnail?id=FILE_ID&sz=s200</div>
-    <div class="modal-actions"><button class="btn-p" onclick="logoApply()">✓ ใช้</button><button class="btn-s" onclick="logoRemove()">✕ ลบ</button></div>
-  </div>
-</div>
-
-<!-- ════ COLOR PICKER ════ -->
-<div id="cpop" class="cpop">
-  <div class="cp-grid" id="cg"></div>
-  <div class="cp-custom"><input type="color" id="cpn" onchange="applyColor(this.value)"><input type="text" class="cp-hex" id="cph" placeholder="#000000" oninput="applyColor(this.value)"><span style="font-size:9px;color:var(--t4)">กำหนดเอง</span></div>
-</div>
-
-<!-- ════ CANDIDATE DETAIL MODAL ════ -->
-<div id="cand-detail-modal" class="modal-bg cand-modal">
-  <div class="modal-box" style="max-width:500px">
-    <div class="modal-hd"><div class="modal-title" id="cd-modal-title">รายละเอียดผู้สมัคร</div><button class="modal-close" onclick="closeCandDetail()">✕</button></div>
-    <div class="cd-hero" id="cd-hero">
-      <div class="cd-hero-bar" id="cd-hero-bar"></div>
-      <div class="cd-av" id="cd-av"></div>
-      <div>
-        <div class="cd-rank" id="cd-rank"></div>
-        <div class="cd-name" id="cd-name">—</div>
-        <div class="cd-party" id="cd-party-row">—</div>
-      </div>
-    </div>
-    <div class="cd-stats">
-      <div class="cd-stat"><div class="cd-stat-val" id="cd-votes">—</div><div class="cd-stat-lbl">คะแนน</div></div>
-      <div class="cd-stat"><div class="cd-stat-val" id="cd-pct">—</div><div class="cd-stat-lbl">%รวม</div></div>
-      <div class="cd-stat"><div class="cd-stat-val" id="cd-dist-win">—</div><div class="cd-stat-lbl">เขตที่ชนะ</div></div>
-    </div>
-    <div class="cd-bar-section"><div class="cd-bar-lbl">เปรียบเทียบ</div><div id="cd-compare-bars"></div></div>
-    <div><div class="cd-bar-lbl">เขตที่ชนะ <span id="cd-dist-count" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--t4)"></span></div><div class="cd-dist-grid" id="cd-dist-grid"></div></div>
-  </div>
-</div>
-
-<!-- ════ DRAWER ════ -->
-<div id="drawer" class="drawer">
-  <div class="drawer-bg" onclick="closeDrawer()"></div>
-  <div class="drawer-panel">
-    <div class="drawer-close"><button onclick="closeDrawer()" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px">✕</button></div>
-    <button class="drawer-tab" onclick="showPage('dashboard',this);closeDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</button>
-    <button class="drawer-tab" onclick="openCMS();closeDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> CMS</button>
-    <button class="drawer-tab" onclick="showPage('import',this);closeDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> นำเข้า/ส่งออก</button>
-  </div>
-</div>
-
 <script>
 // ── UI ────────────────────────────────────────────────────────
 function showPage(id,btn){
@@ -1003,8 +560,8 @@ function renderDash(d){
   const w=d.cands[0];
   if(w&&w.name){
     const aw=f('w-avatar-wrap');
-    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',72)">`;
-    else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',72);
+    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',128))">`;
+    else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',94);
     f('w-name').textContent=w.name;
     f('w-party-wrap').textContent=w.party;
     f('w-votes').textContent=w.votes.toLocaleString()+' คะแนน';
@@ -1023,7 +580,7 @@ const medals = MEDAL_SVG;
     const vp=tv?(c.votes/tv*100).toFixed(1):0;
     const bw=d.cands[0].votes?(c.votes/d.cands[0].votes*100):0;
     const isFirst=i===0;
-    const avSize=isFirst?48:40;
+    const avSize=isFirst?76:62;
     const avCls='ci-av'+(isFirst?' r1':'');
     const av=c.avatar?`<div class="${avCls}"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','${avCls}',${avSize})"></div>`:svgAvHtml(c.name,c.color,avCls,avSize);
     return `<div class="ci" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s">
@@ -1208,38 +765,52 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const text=await res.text();
     const lines=text.trim().split('\n').filter(l=>l.trim());
     if(lines.length<2) throw new Error('ไม่พบข้อมูล');
+
+    // หา header row — ต้องมี name หรือ party
     let headerIdx=0;
     for(let i=0;i<Math.min(lines.length,6);i++){
-      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase().replace(/[^a-z]/g,''));
-      if(cols.includes('name')||cols.includes('votes')||cols.includes('party')){headerIdx=i;break;}
+      const cols=parseCSVLine(lines[i]).map(c=>(c||'').toLowerCase().replace(/[^a-zก-ฮ]/g,''));
+      if(cols.some(c=>c.includes('name')||c.includes('ชื่อ'))&&
+         cols.some(c=>c.includes('party')||c.includes('พรรค')||c.includes('สังกัด'))){
+        headerIdx=i;break;
+      }
     }
-    const header=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
-    const firstH=header[0].replace(/[^a-zก-ฮ]/g,'');
-    const off=(firstH==='no'||firstH==='num'||firstH===''||firstH==='ลำดับ'||firstH==='ที')?1:0;
+    // header-based mapping — ไม่ขึ้นกับลำดับ column
+    const hdr=parseCSVLine(lines[headerIdx]).map(h=>(h||'').toLowerCase().trim());
+    const getIdx=(tokens)=>hdr.findIndex(h=>tokens.some(t=>h.includes(t)));
+    const iName  =getIdx(['name','ชื่อ']);
+    const iParty =getIdx(['party','พรรค','สังกัด']);
+    const iVotes =getIdx(['vote','คะแนน']);   // -1 ถ้าไม่มีคอลัมน์ votes ก็ได้
+    const iColor =getIdx(['color','สี','hex']);
+    const iAvt   =getIdx(['avatar','รูป']);
+    const iLogo  =getIdx(['logo','โลโก้']);
+    if(iName<0) throw new Error('ไม่พบคอลัมน์ชื่อ (Name)');
+
     const rows=lines.slice(headerIdx+1).map(parseCSVLine).filter(r=>{
-      const first=(r[0]||'').replace(/^"+|"+$/g,'').trim();
-      if(!first) return false;
-      if(first.startsWith('📋')||first.startsWith('รวม')||first.length>30) return false;
-      const rawV=(r[2+off]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim();
-      if(rawV&&isNaN(parseInt(rawV))) return false;
+      const nm=(r[iName]||'').replace(/^"+|"+$/g,'').trim();
+      if(!nm||nm.length>50) return false;
+      if(nm.startsWith('รวม')||nm.startsWith('📋')) return false;
       return true;
     });
+
+    const clean=(r,i)=>i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';
     const parsed=rows.map((r,i)=>({
       id:i+1,
-      name:(r[0+off]||'ผู้สมัคร '+(i+1)).replace(/^"+|"+$/g,'').trim(),
-      party:(r[1+off]||'อิสระ').replace(/^"+|"+$/g,'').trim(),
-      votes:parseInt((r[2+off]||'0').replace(/[^0-9]/g,''))||0,
-      color:((r[3+off]||'').replace(/^"+|"+$/g,'').trim()||PRESET[i%PRESET.length]),
-      avatar:(r[4+off]||'').replace(/^"+|"+$/g,'').trim(),
-      partyLogo:(r[5+off]||'').replace(/^"+|"+$/g,'').trim(),
-    })).filter(c=>c.votes>0&&c.name.length<50).sort((a,b)=>b.votes-a.votes);
-    if(!parsed.length) throw new Error('ไม่พบคะแนน ตรวจสอบคอลัมน์ Votes');
+      name:clean(r,iName)||'ผู้สมัคร '+(i+1),
+      party:clean(r,iParty)||'อิสระ',
+      votes:iVotes>=0?parseInt(clean(r,iVotes).replace(/[^0-9]/g,''))||0:0,
+      color:clean(r,iColor)||PRESET[i%PRESET.length],
+      avatar:clean(r,iAvt),
+      partyLogo:clean(r,iLogo),
+    })).filter(c=>c.name.length<50);  // ไม่ filter votes>0 แล้ว
+
+    if(!parsed.length) throw new Error('ไม่พบข้อมูลผู้สมัคร ตรวจสอบคอลัมน์ Name');
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
     document.getElementById('live-txt').textContent='โหลดแล้ว';
     simStep=60;renderDash(mockData());
-    alert('โหลดสำเร็จ '+cands.length+' ผู้สมัคร');
-  }catch(e){alert('โหลดไม่สำเร็จ:\n'+e.message);document.getElementById('live-txt').textContent='Error';}
+    showToast('โหลดสำเร็จ '+cands.length+' ผู้สมัคร', 'success');
+  }catch(e){showToast('โหลดไม่สำเร็จ: '+e.message,'error');document.getElementById('live-txt').textContent='Error';}
 }
 async function loadGSheetURL(){
   const url=document.getElementById('gs-url').value.trim();
@@ -1500,7 +1071,7 @@ function startRealtimeListener(){
       party: c.party||'อิสระ', votes: parseInt(c.votes)||0,
       color: c.color||PRESET[i%PRESET.length],
       avatar: c.avatar||'', partyLogo: c.partyLogo||''
-    })).filter(c => c.votes > 0).sort((a,b) => b.votes - a.votes);
+    })).sort((a,b) => b.votes - a.votes);
     // Load districts
     if (data.districts) {
       districtData = Array.isArray(data.districts) ? data.districts : Object.values(data.districts);
