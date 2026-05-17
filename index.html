@@ -769,8 +769,8 @@ function toggleUserMenu(){}function signOut(){}
 // ── DATA ──────────────────────────────────────────────────────
 const BKK_DISTRICTS=["คลองเตย","คลองสามวา","คันนายาว","จตุจักร","ดอนเมือง","ดินแดง","ดุสิต","บางกะปิ","บางคอแหลม","บางซื่อ","บางนา","บางรัก","บางเขน","บึงกุ่ม","ปทุมวัน","ประเวศ","ป้อมปราบศัตรูพ่าย","พญาไท","พระนคร","พระโขนง","มีนบุรี","ยานนาวา","ราชเทวี","ลาดกระบัง","ลาดพร้าว","วังทองหลาง","วัฒนา","สวนหลวง","สะพานสูง","สัมพันธวงศ์","สาทร","สายไหม","หนองจอก","หลักสี่","ห้วยขวาง","คลองสาน","จอมทอง","ตลิ่งชัน","ทวีวัฒนา","ทุ่งครุ","ธนบุรี","บางกอกน้อย","บางกอกใหญ่","บางขุนเทียน","บางบอน","บางพลัด","บางแค","ภาษีเจริญ","ราษฎร์บูรณะ","หนองแขม"];
 const DEF=[
-  {id:1,originalIndex:0,name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",          votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
-  {id:2,originalIndex:1,name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
+  {id:1,originalIndex:0,no:1,name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",          votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
+  {id:2,originalIndex:1,no:2,name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
   {id:3,originalIndex:2,name:"วิโรจน์ ลักขณาอดิศร",    party:"ก้าวไกล",         votes:247606, color:"#ffcc00",avatar:"",partyLogo:""},
   {id:4,originalIndex:3,name:"อัศวิน ขวัญเมือง",       party:"อิสระ (ราชการ)", votes:207740, color:"#8b949e",avatar:"",partyLogo:""},
   {id:5,originalIndex:4,name:"รสนา โตสิตระกูล",         party:"อิสระ",          votes:72541,  color:"#c084fc",avatar:"",partyLogo:""},
@@ -904,7 +904,7 @@ function renderDash(d){
     if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
     else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',94);
     f('w-name').textContent=w.name;
-    f('w-party-wrap').textContent=w.party;
+    f('w-party-wrap').innerHTML=(w.no?`<span style="font-size:11px;color:var(--t4);margin-right:6px">เบอร์ ${w.no}</span>`:'')+(w.party||'');
     f('w-votes').textContent=w.votes.toLocaleString()+' คะแนน';
     f('w-pct').textContent=(tv?(w.votes/tv*100).toFixed(1):0)+'%';
     f('w-bar').style.width=(tv?(w.votes/tv*100).toFixed(1):0)+'%';
@@ -927,7 +927,10 @@ const medals = MEDAL_SVG;
     return `<div class="ci" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s">
       <div class="ci::before" style="background:${c.color}"></div>
       <style>.ci:nth-child(${i+1})::before{background:${c.color}}</style>
-      <div class="ci-rank" style="color:${isFirst?c.color:'var(--t4)'}">${i+1}</div>
+      <div class="ci-rank" style="color:${isFirst?c.color:'var(--t4)'}">
+        <span style="font-size:9px;color:var(--t4);display:block;line-height:1">เบอร์</span>
+        ${c.no||i+1}
+      </div>
       ${av}
       <div class="ci-info">
         <div class="ci-name" style="color:${isFirst?c.color:'var(--t1)'}">${c.name}</div>
@@ -1154,6 +1157,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const parsed=rows.map((r,i)=>({
       id:i+1,
       originalIndex:i,  // เก็บลำดับจาก Sheet ไว้ map กับ votes_N
+      no: iNo>=0 ? (parseInt(clean(r,iNo))||i+1) : i+1,  // เบอร์ผู้สมัครจาก Sheet
       name:clean(r,iName)||'ผู้สมัคร '+(i+1),
       party:clean(r,iParty)||'อิสระ',
       votes:iVotes>=0?parseInt(clean(r,iVotes).replace(/[^0-9]/g,''))||0:0,
@@ -1166,8 +1170,8 @@ async function loadFromCSVUrl(csvUrl,lbl){
     cands=parsed;
     document.getElementById('foot-src').textContent=lbl||'Google Sheets';
     document.getElementById('live-txt').textContent='โหลดแล้ว';
-    simStep=60;renderDash(mockData());
-    showToast('โหลดสำเร็จ '+cands.length+' ผู้สมัคร', 'success');
+    simStep=60;
+    // ไม่ render ที่นี่ — ให้ caller render หลัง districts โหลดเสร็จแล้ว
   }catch(e){showToast('โหลดไม่สำเร็จ: '+e.message,'error');document.getElementById('live-txt').textContent='Error';}
 }
 async function loadGSheetURL(){
@@ -1181,10 +1185,14 @@ async function loadGSheetURL(){
     if(distUrl) await loadDistrictSheet(distUrl);
     const skgUrl=document.getElementById('gs-skg-url')?.value.trim();
     if(skgUrl) await loadSKGSheet(skgUrl);
+    // render หลัง load ทุก sheet เสร็จแล้ว — districtData พร้อมแล้ว
+    renderDash(mockData());
+    if(Object.keys(skgData).length) renderSKGOverview();
     document.getElementById('sheet-panel').style.display='none';
     document.getElementById('sheet-panel-toggle').innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>';
     const parts=['ผู้สมัคร'];if(distUrl)parts.push('เขต');if(skgUrl)parts.push('สก.');
     if(statusEl){statusEl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> '+parts.join('+');statusEl.style.color='var(--g)';}
+    showToast('โหลดสำเร็จ '+cands.length+' ผู้สมัคร'+(districtData?', '+districtData.length+' เขต':''), 'success');
   }catch(e){if(statusEl){statusEl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> '+e.message.slice(0,40);statusEl.style.color='var(--red)';}}
 }
 async function loadDistrictSheet(url){
@@ -1222,8 +1230,7 @@ async function loadDistrictSheet(url){
       });
       return obj;
     }).filter(r=>r.district&&r.district.length<30);
-    alert('โหลดข้อมูลเขต '+districtData.length+' เขต');
-    simStep=60;renderDash(mockData());
+    // render จะถูกเรียกโดย caller (loadGSheetURL) หลัง load ทุก sheet
   }catch(e){alert('โหลดเขตไม่สำเร็จ: '+e.message);}
 }
 async function loadSKGSheet(url){
@@ -1256,7 +1263,7 @@ async function loadSKGSheet(url){
     renderSKGOverview();
   }catch(e){alert('โหลด สก. ไม่สำเร็จ: '+e.message);}
 }
-async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');}catch(e){alert(e.message);}}
+async function loadGSheetURL2(){const url=document.getElementById('gs-url2').value.trim();if(!url)return;try{await loadFromCSVUrl(sheetURLtoCSV(url),'Google Sheets');renderDash(mockData());}catch(e){showToast(e.message,'error');}}
 async function loadAPI(){
   const url=document.getElementById('api-url').value.trim();if(!url) return;
   clearInterval(simTimer);
@@ -1432,7 +1439,8 @@ function startRealtimeListener(){
     if (!arr.length) return;
     cands = arr.map((c,i) => ({
       id: c.id||i+1,
-      originalIndex: c.originalIndex !== undefined ? c.originalIndex : i,  // ดึงจาก Firebase หรือใช้ index
+      originalIndex: c.originalIndex !== undefined ? c.originalIndex : i,
+      no: c.no || c.id || i+1,  // เบอร์ผู้สมัคร
       name: c.name||'ผู้สมัคร'+(i+1),
       party: c.party||'อิสระ', votes: parseInt(c.votes)||0,
       color: c.color||PRESET[i%PRESET.length],
