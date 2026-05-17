@@ -769,11 +769,11 @@ function toggleUserMenu(){}function signOut(){}
 // ── DATA ──────────────────────────────────────────────────────
 const BKK_DISTRICTS=["พระนคร","ดุสิต","หนองจอก","บางรัก","บางเขน","บางกอกน้อย","บางกอกใหญ่","ห้วยขวาง","พระโขนง","มีนบุรี","ลาดกระบัง","ยานนาวา","สัมพันธวงศ์","จอมทอง","บึงกุ่ม","สาทร","บางซื่อ","จตุจักร","ลาดพร้าว","ดอนเมือง","ราษฎร์บูรณะ","หลักสี่","วังทองหลาง","คลองสาน","สวนหลวง","ตลิ่งชัน","บางพลัด","บึงกุ่ม","ปทุมวัน","ป้อมปราบ","พระสมุทรเจดีย์","มีนบุรี","ลาดกระบัง","คันนายาว","สะพานสูง","คลองเตย","วัฒนา","บางนา","ทวีวัฒนา","ทุ่งครุ","บางบอน","ราษฎร์บูรณะ","หลักสี่","ลาดพร้าว","ประเวศ","บางแค","ภาษีเจริญ","หนองแขม","ดอนเมือง","หนองจอก"];
 const DEF=[
-  {id:1,name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",          votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
-  {id:2,name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
-  {id:3,name:"วิโรจน์ ลักขณาอดิศร",    party:"ก้าวไกล",         votes:247606, color:"#ffcc00",avatar:"",partyLogo:""},
-  {id:4,name:"อัศวิน ขวัญเมือง",       party:"อิสระ (ราชการ)", votes:207740, color:"#8b949e",avatar:"",partyLogo:""},
-  {id:5,name:"รสนา โตสิตระกูล",         party:"อิสระ",          votes:72541,  color:"#c084fc",avatar:"",partyLogo:""},
+  {id:1,originalIndex:0,name:"ชัชชาติ สิทธิพันธุ์",    party:"อิสระ",          votes:1386503,color:"#00c896",avatar:"",partyLogo:""},
+  {id:2,originalIndex:1,name:"สุชัชวีร์ สุวรรณสวัสดิ์", party:"ประชาธิปัตย์",  votes:253930, color:"#4d9fff",avatar:"",partyLogo:""},
+  {id:3,originalIndex:2,name:"วิโรจน์ ลักขณาอดิศร",    party:"ก้าวไกล",         votes:247606, color:"#ffcc00",avatar:"",partyLogo:""},
+  {id:4,originalIndex:3,name:"อัศวิน ขวัญเมือง",       party:"อิสระ (ราชการ)", votes:207740, color:"#8b949e",avatar:"",partyLogo:""},
+  {id:5,originalIndex:4,name:"รสนา โตสิตระกูล",         party:"อิสระ",          votes:72541,  color:"#c084fc",avatar:"",partyLogo:""},
 ];
 const PRESET=["#00c896","#4d9fff","#ffcc00","#ff6b6b","#c084fc","#fb923c","#34d399","#60a5fa","#fbbf24","#f87171","#a78bfa","#2dd4bf"];
 const EMOJI_FB=[]; // SVG avatars used instead
@@ -848,10 +848,12 @@ function buildFromDistricts() {
     if (!row || !row.counted) return { name, winner: null, counted: false };
 
     counted++;
-    // คะแนนแต่ละผู้สมัครในเขตนี้ — votes_1 = cands[0], votes_2 = cands[1], ...
+    // ใช้ originalIndex เพื่อ map votes_N ให้ถูกคน
+    // votes_1 = ผู้สมัคร originalIndex=0, votes_2 = originalIndex=1, ...
     const dv = cands.map((c, ci) => {
-      const v = row['votes_' + (ci + 1)] || 0;
-      totals[ci] += v;   // สะสมคะแนนรวมด้วย
+      const sheetRow = (c.originalIndex !== undefined ? c.originalIndex : ci);
+      const v = row['votes_' + (sheetRow + 1)] || 0;
+      totals[ci] += v;   // สะสมคะแนนรวม (totals index ตาม cands ที่ sort แล้ว)
       return { ...c, votes: v };
     });
 
@@ -1151,6 +1153,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     const clean=(r,i)=>i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';
     const parsed=rows.map((r,i)=>({
       id:i+1,
+      originalIndex:i,  // เก็บลำดับจาก Sheet ไว้ map กับ votes_N
       name:clean(r,iName)||'ผู้สมัคร '+(i+1),
       party:clean(r,iParty)||'อิสระ',
       votes:iVotes>=0?parseInt(clean(r,iVotes).replace(/[^0-9]/g,''))||0:0,
@@ -1428,7 +1431,9 @@ function startRealtimeListener(){
     const arr = Array.isArray(data.candidates) ? data.candidates : Object.values(data.candidates);
     if (!arr.length) return;
     cands = arr.map((c,i) => ({
-      id: c.id||i+1, name: c.name||'ผู้สมัคร'+(i+1),
+      id: c.id||i+1,
+      originalIndex: c.originalIndex !== undefined ? c.originalIndex : i,  // ดึงจาก Firebase หรือใช้ index
+      name: c.name||'ผู้สมัคร'+(i+1),
       party: c.party||'อิสระ', votes: parseInt(c.votes)||0,
       color: c.color||PRESET[i%PRESET.length],
       avatar: c.avatar||'', partyLogo: c.partyLogo||''
