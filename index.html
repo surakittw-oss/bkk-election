@@ -1154,6 +1154,17 @@ async function loadFromCSVUrl(csvUrl,lbl){
     });
 
     const clean=(r,i)=>i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';
+    // แปลง Google Drive view/share link → thumbnail URL อัตโนมัติ
+    const gdrive=(url)=>{
+      if(!url) return '';
+      // /file/d/FILE_ID/view → thumbnail
+      const m1=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if(m1) return 'https://drive.google.com/thumbnail?id='+m1[1]+'&sz=s400';
+      // /open?id=FILE_ID → thumbnail
+      const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if(m2 && url.includes('drive.google.com')) return 'https://drive.google.com/thumbnail?id='+m2[1]+'&sz=s400';
+      return url;
+    };
     const parsed=rows.map((r,i)=>({
       id:i+1,
       originalIndex:i,  // เก็บลำดับจาก Sheet ไว้ map กับ votes_N
@@ -1162,7 +1173,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
       party:clean(r,iParty)||'อิสระ',
       votes:iVotes>=0?parseInt(clean(r,iVotes).replace(/[^0-9]/g,''))||0:0,
       color:clean(r,iColor)||PRESET[i%PRESET.length],
-      avatar:clean(r,iAvt),
+      avatar:gdrive(clean(r,iAvt)),
       partyLogo:clean(r,iLogo),
     })).filter(c=>c.name.length<50);  // ไม่ filter votes>0 แล้ว
 
@@ -1521,6 +1532,54 @@ if(fbPmEl) fbPmEl.style.display='block';
 // ไม่รัน startSim() เพราะเป็น Firebase mode
 // startSim() จะถูกเรียกเฉพาะถ้า Firebase ไม่มีข้อมูล (fallback)
 initFirebase();
+
+// ════ SECTION EMBED MODE ════
+(function(){
+  const params  = new URLSearchParams(window.location.search);
+  const section = params.get('section');
+  if(!section) return;
+
+  // inject CSS ซ่อน topbar + padding ทันที ก่อน paint
+  const style = document.createElement('style');
+  style.textContent = `
+    .topbar{display:none!important}
+    body{background:transparent!important}
+    .dashboard{padding:0!important;margin:0!important}
+    .detail-overlay{display:none!important}
+    /* section map */
+    .section-map .middle-row{grid-template-columns:1fr!important;margin:0}
+    .section-map .right-col{display:none!important}
+    .section-map .hero-row,.section-map .bottom-row,
+    .section-map #skg-overview-card{display:none!important}
+    /* section candidates */
+    .section-candidates .hero-row,.section-candidates .middle-row,
+    .section-candidates #skg-overview-card{display:none!important}
+    .section-candidates .bottom-row{margin:0}
+    /* section skg */
+    .section-skg .hero-row,.section-skg .middle-row,
+    .section-skg .bottom-row{display:none!important}
+    .section-skg #skg-overview-card{display:block!important;margin:0!important}
+    /* section winner */
+    .section-winner .middle-row,.section-winner .bottom-row,
+    .section-winner #skg-overview-card{display:none!important}
+    .section-winner .hero-row{margin:0}
+    .section-winner .winner-card{grid-row:1!important}
+  `;
+  document.head.appendChild(style);
+
+  // เพิ่ม class ให้ body ตาม section
+  document.documentElement.classList.add('section-' + section);
+  document.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('section-' + section);
+    // ส่งความสูงกลับ parent สำหรับ auto-resize iFrame
+    function sendHeight(){
+      window.parent.postMessage({type:'bkkvote-resize',height:document.body.scrollHeight},'*');
+    }
+    setTimeout(sendHeight, 600);
+    setTimeout(sendHeight, 1500); // ส่งอีกรอบหลัง Firebase load
+  });
+})();
+
 </script>
 
 <div id="toast" class="toast"><span id="toast-icon"></span><span id="toast-msg">—</span></div>
