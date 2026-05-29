@@ -514,9 +514,21 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
             </div>
           </div>
           <div id="pm-api" style="display:none">
-            <div style="display:flex;gap:5px">
-              <input class="inp" id="api-url" placeholder="https://.../election.json" style="flex:1">
-              <button class="btn-p" onclick="loadAPI()">โหลด</button>
+            <div style="margin-bottom:6px">
+              <div style="font-size:10px;color:var(--t4);margin-bottom:4px">ECT Election API (media.election.in.th)</div>
+              <div style="display:flex;gap:5px;margin-bottom:5px">
+                <input class="inp" id="ect-key" placeholder="Partner API Key (ถ้ามี)" style="flex:1;font-size:11px">
+                <button class="btn-p" onclick="ECT_KEY=document.getElementById('ect-key').value.trim();startECTPolling()">▶ Live</button>
+                <button class="btn-s" onclick="stopECTPolling()">■ หยุด</button>
+              </div>
+              <div style="font-size:10px;color:var(--t4)">Auto-refresh ทุก 60 วินาที · GOVERNOR_ID + COUNCIL_ID ตั้งค่าใน code แล้ว</div>
+            </div>
+            <div style="border-top:1px solid var(--line2);padding-top:6px;margin-top:2px">
+              <div style="font-size:10px;color:var(--t4);margin-bottom:4px">หรือโหลด JSON จาก URL ตรง</div>
+              <div style="display:flex;gap:5px">
+                <input class="inp" id="api-url" placeholder="https://.../election.json" style="flex:1">
+                <button class="btn-p" onclick="loadAPI()">โหลด</button>
+              </div>
             </div>
           </div>
         </div>
@@ -807,6 +819,8 @@ function setMode(m,btn){
   });
   if(m==='mock'){
     startSim();
+  } else if(m==='api'){
+    stopECTPolling();  // reset ก่อน user กด manual
   } else {
     clearInterval(simTimer);
     // ถ้าเปลี่ยนกลับมา Firebase → reconnect listener
@@ -1514,6 +1528,118 @@ async function loadFromFirebase(){
     alert('โหลดสำเร็จ '+cands.length+' ผู้สมัคร');
   }catch(e){setFBStatus('offline','โหลดไม่ได้');alert(e.message);}
 }
+
+
+// ════ ECT ELECTION API ════════════════════════════════════════════
+const ECT_KEY         = '';  // ใส่ Partner Key ที่ได้รับ
+const ECT_BASE        = 'https://media.election.in.th';
+const ECT_GOVERNOR_ID = '095f76e8-bed8-42e3-859a-2b47540ba8bd';
+const ECT_COUNCIL_ID  = 'be5498a6-9d05-4655-8f1d-ba0f9dcb07a4';
+let   ectTimer        = null;
+
+// helper fetch
+function ectGet(path){
+  const headers = ECT_KEY ? {Authorization:'Bearer '+ECT_KEY} : {};
+  return fetch(ECT_BASE+path,{headers}).then(r=>r.json()).then(j=>j.data);
+}
+
+// โหลดทุกอย่างจาก ECT API แล้ว render
+async function loadFromECT(){
+  document.getElementById('live-txt').textContent='โหลด...';
+  document.getElementById('foot-src').textContent='ECT API';
+  try{
+    const [govStat, govCands, govAreas, councilAreas] = await Promise.all([
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/statistics`),
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/candidates`),
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/electionAreas`),
+      ectGet(`/api/media/elections/${ECT_COUNCIL_ID}/auto/candidates`),
+    ]);
+
+    // ── candidates ─────────────────────────────────────────────────
+    cands = govCands.candidates
+      .sort((a,b)=>b.totalVotes-a.totalVotes)
+      .map((c,i)=>({
+        id: c.candidateId||i+1,
+        no: c.candidateNumber||i+1,
+        originalIndex: i,
+        name: c.name||'ผู้สมัคร '+(i+1),
+        party: c.party?.name||'อิสระ',
+        votes: c.totalVotes||0,
+        color: c.party?.color||PRESET[i%PRESET.length],
+        avatar: c.imageUrl||c.image||'',
+        partyLogo: c.party?.imageUrl||'',
+      }));
+
+    // ── districtData จาก electionAreas ────────────────────────────
+    // map areaNumber → district name ด้วย BKK_DISTRICTS
+    districtData = govAreas.electionAreas.map(a=>{
+      const distName = a.name || BKK_DISTRICTS[a.areaNumber-1] || 'เขต '+a.areaNumber;
+      // สร้าง votes_N จาก candidates ของเขตนี้
+      const row = {district: distName, counted: a.coverage?.percentage > 0};
+      if(a.candidates){
+        a.candidates.forEach(c=>{
+          const idx = cands.findIndex(x=>x.no===c.candidateNumber);
+          if(idx>=0) row['votes_'+(idx+1)] = c.totalVotes||0;
+        });
+      }
+      return row;
+    });
+
+    // ── skgData จาก council candidates ────────────────────────────
+    skgData = {};
+    if(councilAreas?.candidates){
+      councilAreas.candidates.forEach(c=>{
+        const dist = c.areaName||'เขต '+c.areaNumber;
+        if(!skgData[dist]) skgData[dist]=[];
+        skgData[dist].push({
+          no: c.candidateNumber,
+          name: c.name,
+          party: c.party?.name||'อิสระ',
+          votes: c.totalVotes||0,
+          elected: c.rank===1,
+          color: c.party?.color||PRESET[skgData[dist].length%PRESET.length],
+          avatar: c.imageUrl||'',
+        });
+      });
+      Object.keys(skgData).forEach(d=>skgData[d].sort((a,b)=>b.votes-a.votes));
+    }
+
+    // ── stat cards ─────────────────────────────────────────────────
+    const pct  = govStat.coverage?.percentage||0;
+    const rep  = govStat.coverage?.stationsReported||0;
+    const tot  = govStat.coverage?.totalStations||0;
+    document.getElementById('s-counted').textContent = rep;
+    document.getElementById('s-total').textContent   = 'จาก '+tot+' หน่วย';
+    document.getElementById('prog').style.width      = pct+'%';
+    document.getElementById('p-pct').textContent     = pct.toFixed(1)+'%';
+    document.getElementById('s-pct').textContent     = pct.toFixed(1)+'%';
+
+    clearInterval(simTimer);
+    document.getElementById('live-txt').textContent = 'ECT Live';
+    document.getElementById('foot-src').textContent = 'ECT API';
+    renderDash(mockData());
+    if(Object.keys(skgData).length) renderSKGOverview();
+    showToast('โหลดจาก ECT API สำเร็จ — '+cands.length+' ผู้สมัคร', 'success');
+
+  }catch(e){
+    showToast('ECT API error: '+e.message,'error');
+    document.getElementById('live-txt').textContent='Error';
+    console.error('ECT API:',e);
+  }
+}
+
+// Auto-refresh ทุก 60 วินาที
+function startECTPolling(){
+  loadFromECT();
+  clearInterval(ectTimer);
+  ectTimer = setInterval(loadFromECT, 60000);
+  document.getElementById('live-txt').textContent='ECT Live';
+}
+function stopECTPolling(){
+  clearInterval(ectTimer);
+  ectTimer = null;
+}
+// ══════════════════════════════════════════════════════════════════
 
 // ── INIT ──────────────────────────────────────────────────────
 buildCP();
