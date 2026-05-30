@@ -388,7 +388,125 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .sc:nth-child(3){animation-delay:.09s}
 .sc:nth-child(4){animation-delay:.12s}
 
+
+/* ════ CANDIDATE RACE CARD ════ */
+.cands-grid{display:flex!important;flex-direction:column;gap:0}
+.ci{
+  display:grid!important;
+  grid-template-columns:56px 96px 1fr auto;
+  align-items:stretch;gap:0;padding:0;
+  border-right:none;border-bottom:1px solid var(--line2);
+  cursor:pointer;transition:background .12s;
+  position:relative;overflow:hidden;min-height:84px;
+}
+.ci:hover{background:var(--bg3)}
+.ci-no{
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:900;color:var(--t4);
+  background:var(--bg3);border-right:1px solid var(--line2);
+  letter-spacing:-1px;flex-shrink:0;
+}
+.ci.r1 .ci-no{color:var(--t1);background:var(--bg2)}
+.ci-av-wrap{
+  width:96px;overflow:hidden;background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;
+  border-right:1px solid var(--line2);flex-shrink:0;
+}
+.ci-av-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.ci-body{padding:12px 16px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.ci-name{font-size:16px;font-weight:700;color:var(--t1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.ci.r1 .ci-name{color:var(--g);font-size:18px}
+.ci-party-tag{
+  display:inline-block;font-size:11px;font-weight:600;
+  padding:2px 8px;border-radius:4px;
+  background:var(--bg4);color:var(--t3);border:1px solid var(--line);
+  margin-bottom:6px;max-width:fit-content;
+}
+.ci-bar-wrap{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:2px}
+.ci-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.ci-score-box{
+  text-align:right;padding:12px 20px;
+  border-left:1px solid var(--line2);min-width:150px;
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:3px;
+  flex-shrink:0;
+}
+.ci-votes-big{font-size:28px;font-weight:900;letter-spacing:-1.5px;color:var(--t1);line-height:1}
+.ci.r1 .ci-votes-big{color:var(--g);font-size:32px}
+.ci-pct-tag{font-size:13px;color:var(--t3)}
+@media(max-width:768px){
+  .ci{grid-template-columns:44px 72px 1fr auto;min-height:70px}
+  .ci-av-wrap{width:72px}
+  .ci-no{font-size:20px}
+  .ci-name{font-size:14px}
+  .ci.r1 .ci-name{font-size:15px}
+  .ci-votes-big{font-size:22px}
+  .ci.r1 .ci-votes-big{font-size:24px}
+  .ci-score-box{padding:10px 14px;min-width:110px}
+}
+@media(max-width:480px){
+  .ci{grid-template-columns:38px 60px 1fr auto;min-height:60px}
+  .ci-av-wrap{width:60px}
+  .ci-no{font-size:17px}
+  .ci-score-box{min-width:90px;padding:8px 10px}
+  .ci-votes-big{font-size:18px}
+  .ci.r1 .ci-votes-big{font-size:20px}
+}
+
+/* ════ SKG PARTY SUMMARY ════ */
+.skg-ov-grid{display:flex!important;flex-direction:column;gap:0}
+.skg-party-row{
+  display:grid;
+  grid-template-columns:56px 80px 1fr auto;
+  align-items:stretch;gap:0;
+  border-bottom:1px solid var(--line2);
+  cursor:pointer;transition:background .12s;
+  min-height:76px;overflow:hidden;
+}
+.skg-party-row:hover{background:var(--bg3)}
+.skg-p-rank{
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:var(--t4);
+  background:var(--bg3);border-right:1px solid var(--line2);
+}
+.skg-p-rank.r1{color:var(--t1);background:var(--bg2)}
+.skg-p-logo{
+  width:80px;display:flex;align-items:center;justify-content:center;
+  border-right:1px solid var(--line2);background:var(--bg4);overflow:hidden;
+}
+.skg-p-logo img{width:54px;height:54px;object-fit:contain;border-radius:50%}
+.skg-p-body{padding:10px 16px;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.skg-p-name{font-size:16px;font-weight:700;color:var(--t1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.skg-party-row.r1 .skg-p-name{color:var(--g)}
+.skg-p-seat-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:700;color:var(--g);
+  padding:2px 8px;border-radius:4px;
+  background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.25);
+  max-width:fit-content;margin-bottom:5px;
+}
+.skg-p-bar-wrap{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.skg-p-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.skg-p-score{
+  text-align:right;padding:10px 20px;border-left:1px solid var(--line2);
+  min-width:170px;display:flex;flex-direction:column;align-items:flex-end;
+  justify-content:center;gap:3px;flex-shrink:0;
+}
+.skg-p-votes{font-size:28px;font-weight:900;letter-spacing:-1.5px;color:var(--t1);line-height:1}
+.skg-party-row.r1 .skg-p-votes{color:var(--g);font-size:32px}
+.skg-p-label{font-size:12px;color:var(--t4)}
+@media(max-width:768px){
+  .skg-party-row{grid-template-columns:44px 64px 1fr auto;min-height:64px}
+  .skg-p-logo{width:64px}
+  .skg-p-logo img{width:44px;height:44px}
+  .skg-p-name{font-size:14px}
+  .skg-p-votes{font-size:22px}
+  .skg-p-score{padding:8px 12px;min-width:120px}
+}
+
 </style>
+
 
 </head>
 <body>
@@ -935,24 +1053,21 @@ const medals = MEDAL_SVG;
     const vp=tv?(c.votes/tv*100).toFixed(1):0;
     const bw=d.cands[0].votes?(c.votes/d.cands[0].votes*100):0;
     const isFirst=i===0;
-    const avSize=isFirst?76:62;
-    const avCls='ci-av'+(isFirst?' r1':'');
-    const av=c.avatar?`<div class="${avCls}"><img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.outerHTML=svgAvHtml('${c.name}','${c.color}','${avCls}',${avSize})"></div>`:svgAvHtml(c.name,c.color,avCls,avSize);
-    return `<div class="ci" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s">
-      <div class="ci::before" style="background:${c.color}"></div>
-      <style>.ci:nth-child(${i+1})::before{background:${c.color}}</style>
-      <div class="ci-rank" style="color:${isFirst?c.color:'var(--t4)'}">
-        <span style="font-size:9px;color:var(--t4);display:block;line-height:1">เบอร์</span>
-        ${c.no||i+1}
+    const avHtml=c.avatar
+      ?`<img src="${c.avatar}" onerror="this.style.display='none';this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',96)">`
+      :svgAv(c.name,c.color,96);
+    return `<div class="ci${isFirst?' r1':''}" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s;border-left:4px solid ${c.color}">
+      <div class="ci-no">${c.no||i+1}</div>
+      <div class="ci-av-wrap">${avHtml}</div>
+      <div class="ci-body">
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-party-tag">${c.party}</div>
+        <div class="ci-bar-wrap"><div class="ci-bar-fill" style="width:${bw.toFixed(1)}%;background:${c.color}"></div></div>
       </div>
-      ${av}
-      <div class="ci-info">
-        <div class="ci-name" style="color:${isFirst?c.color:'var(--t1)'}">${c.name}</div>
-        <div class="ci-party">${c.party}</div>
-        <div class="ci-bar"><div class="ci-bar-f" style="width:${bw.toFixed(1)}%;background:${c.color}"></div></div>
+      <div class="ci-score-box">
+        <div class="ci-votes-big">${c.votes>=1e6?(c.votes/1e6).toFixed(3)+'M':c.votes.toLocaleString()}</div>
+        <div class="ci-pct-tag">${vp}%</div>
       </div>
-      <div class="ci-score"><div class="ci-votes">${c.votes.toLocaleString()}</div><div class="ci-pct">${vp}%</div></div>
-      ${i<3?`<div class="ci-medal">${medals[i]}</div>`:''}
     </div>`;
   }).join('');
 
@@ -1086,16 +1201,49 @@ function renderSKGOverview(){
   const body=document.getElementById('skg-overview-body');
   const meta=document.getElementById('skg-overview-meta');
   if(!skgData||!Object.keys(skgData).length){card.style.display='none';return;}
+
+  // รวมคะแนนและที่นั่งตามพรรค
+  const partyMap={};
+  Object.values(skgData).forEach(dist=>{
+    dist.forEach(c=>{
+      const p=c.party||'อิสระ';
+      if(!partyMap[p]) partyMap[p]={
+        name:p,votes:0,seats:0,
+        color:c.color||PRESET[Object.keys(partyMap).length%PRESET.length],
+        avatar:c.partyLogo||c.avatar||''
+      };
+      partyMap[p].votes+=c.votes||0;
+      if(c.elected) partyMap[p].seats+=1;
+    });
+  });
+
+  const parties=Object.values(partyMap).sort((a,b)=>b.seats-a.seats||b.votes-a.votes);
+  const totalSeats=parties.reduce((s,p)=>s+p.seats,0);
+  const totalVotes=parties.reduce((s,p)=>s+p.votes,0);
+  const maxVotes=parties[0]?.votes||1;
+
   const districts=Object.keys(skgData);
-  const totalElected=districts.reduce((s,d)=>s+skgData[d].filter(c=>c.elected).length,0);
-  meta.textContent=districts.length+' เขต · '+totalElected+' ที่นั่ง';
+  meta.textContent=districts.length+' เขต · '+totalSeats+' ที่นั่ง · '+parties.length+' พรรค';
   card.style.display='block';
-  body.innerHTML=districts.map(dname=>{
-    const cs=skgData[dname];
-    const elected=cs.filter(c=>c.elected);
-    return `<div class="skg-mini" onclick="showSKGDistrictDetail('${dname}')">
-      <div class="skg-mini-hd"><span class="skg-mini-name">${dname}</span><span class="skg-mini-tag">${elected.length} ที่นั่ง</span></div>
-      ${cs.slice(0,2).map(s=>{const col=s.color||'#3d506a';const av=s.avatar?`<div class="skg-mini-av"><img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover"></div>`:svgAvHtml(s.name,col,'skg-mini-av',14);return `<div class="skg-mini-row">${av}<span class="skg-mini-cand" style="color:${s.elected?col:'var(--t3)'}">${s.elected?'✓ ':''}${s.name.split(' ').slice(0,2).join(' ')}</span></div>`;}).join('')}
+
+  body.innerHTML=parties.map((p,i)=>{
+    const bw=(p.votes/maxVotes*100).toFixed(1);
+    const vpct=totalVotes?(p.votes/totalVotes*100).toFixed(1):0;
+    const logoHtml=p.avatar
+      ?`<img src="${p.avatar}" onerror="this.style.display='none'">`
+      :svgAv(p.name,p.color,54);
+    return `<div class="skg-party-row${i===0?' r1':''}" onclick="">
+      <div class="skg-p-rank${i===0?' r1':''}">${i+1}</div>
+      <div class="skg-p-logo">${logoHtml}</div>
+      <div class="skg-p-body">
+        <div class="skg-p-name">${p.name}</div>
+        ${p.seats>0?`<div class="skg-p-seat-tag">✓ ${p.seats} ที่นั่ง</div>`:''}
+        <div class="skg-p-bar-wrap"><div class="skg-p-bar-fill" style="width:${bw}%;background:${p.color}"></div></div>
+      </div>
+      <div class="skg-p-score">
+        <div class="skg-p-votes">${p.votes>=1e6?(p.votes/1e6).toFixed(3)+'M':p.votes.toLocaleString()}</div>
+        <div class="skg-p-label">คะแนน · ${vpct}%</div>
+      </div>
     </div>`;
   }).join('');
 }
