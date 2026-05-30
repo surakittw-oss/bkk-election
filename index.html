@@ -1494,14 +1494,22 @@ async function loadSKGSheet(url){
     }
     const hdr=parseCSVLine(lines[hdrIdx]).map(h=>(h||'').toLowerCase().replace(/[^a-z_]/g,'').trim());
     skgData={};
-    lines.slice(hdrIdx+1).map(parseCSVLine).filter(r=>{
+    // ข้าม description row (แถวถัดจาก header) โดย slice hdrIdx+2
+    // Sheet มี: title / header / description / data...
+    const dataStartIdx = hdrIdx + 2;
+    lines.slice(dataStartIdx).map(parseCSVLine).filter(r=>{
       const f=(r[0]||'').replace(/^"+|"+$/g,'').trim();
-      return f&&f.length<=25&&!f.startsWith('รวม');
+      if(!f||f.length>25) return false;
+      if(f.startsWith('รวม')||f.startsWith('📋')) return false;
+      // กรอง description row โดยตรวจ column no (r[1]) ว่าเป็นภาษาไทย
+      const noRaw=(r[1]||'').replace(/^"+|"+$/g,'').trim();
+      if(noRaw && isNaN(parseInt(noRaw)) && noRaw.length>1) return false;
+      return true;
     }).forEach(r=>{
       const get=k=>{const i=hdr.indexOf(k);return i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';};
-      const dist=get('district');if(!dist) return;
+      const dist=get('district');if(!dist||dist.includes('ชื่อ')||/[a-zA-Z]/.test(dist)) return;
       const entry={no:parseInt(get('no'))||0,name:get('name'),party:get('party')||'อิสระ',votes:parseInt(get('votes'))||0,elected:get('elected')==='1',color:get('color')||'',avatar:get('avatar_url')||get('avatar')||''};
-      if(!entry.name) return;
+      if(!entry.name||entry.name.includes('นามสกุล')||entry.name==='name') return;
       if(!skgData[dist]) skgData[dist]=[];
       skgData[dist].push(entry);
     });
