@@ -1201,6 +1201,75 @@ function showSKGDistrictDetail(dname){
   }
 }
 
+
+// ── SKG Party Detail ──────────────────────────────────────────
+function openSKGPartyDetail(partyName){
+  // รวบรวมผู้สมัครทุกเขตของพรรคนี้
+  const members = [];
+  Object.entries(skgData).forEach(([dist, candidates])=>{
+    candidates.forEach(c=>{
+      if((c.party||'อิสระ')===partyName){
+        members.push({...c, district: dist});
+      }
+    });
+  });
+  if(!members.length) return;
+
+  members.sort((a,b)=>b.votes-a.votes);
+  const totalVotes  = members.reduce((s,c)=>s+c.votes,0);
+  const electedList = members.filter(c=>c.elected);
+  const partyColor  = members[0]?.color||'var(--g)';
+
+  // ใช้ detail-overlay เดิม
+  const overlay   = document.getElementById('detail-overlay');
+  const titleEl   = document.getElementById('detail-title');
+  const bodyEl    = document.getElementById('detail-body');
+
+  titleEl.innerHTML = `<span style="color:${partyColor}">${partyName}</span>
+    <span style="font-size:11px;color:var(--t4);font-weight:400;margin-left:8px">
+      ${electedList.length} ที่นั่ง · ${members.length} ผู้สมัคร
+    </span>`;
+
+  bodyEl.innerHTML = `
+    <div style="display:flex;gap:12px;padding:8px 0 12px;border-bottom:1px solid var(--line2);margin-bottom:10px">
+      <div style="text-align:center;flex:1">
+        <div style="font-size:22px;font-weight:900;color:${partyColor}">${electedList.length}</div>
+        <div style="font-size:10px;color:var(--t4)">ที่นั่ง</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:22px;font-weight:900;color:var(--t1)">${totalVotes.toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--t4)">คะแนนรวม</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:22px;font-weight:900;color:var(--t1)">${members.length}</div>
+        <div style="font-size:10px;color:var(--t4)">เขต</div>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t4);margin-bottom:8px">รายชื่อผู้สมัคร</div>
+    ${members.map((c,i)=>{
+      const av = c.avatar
+        ? `<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentNode.innerHTML=svgAv('${c.name}','${partyColor}',28)">`
+        : svgAv(c.name, partyColor, 28);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line2)">
+        <div style="width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg4)">${av}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:${c.elected?700:400};color:${c.elected?partyColor:'var(--t1)'};
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${c.elected?'✓ ':''}${c.name}
+          </div>
+          <div style="font-size:11px;color:var(--t4)">เขต${c.district}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:12px;font-weight:600;color:var(--t1)">${c.votes.toLocaleString()}</div>
+          ${c.elected?`<div style="font-size:10px;color:${partyColor}">ได้รับเลือก</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+
+  overlay.classList.add('open');
+}
+
 function renderSKGOverview(){
   const card=document.getElementById('skg-overview-card');
   const body=document.getElementById('skg-overview-body');
@@ -1237,7 +1306,7 @@ function renderSKGOverview(){
     const logoHtml=p.avatar
       ?`<img src="${p.avatar}" onerror="this.style.display='none'">`
       :svgAv(p.name,p.color,54);
-    return `<div class="skg-party-row${i===0?' r1':''}" onclick="">
+    return `<div class="skg-party-row${i===0?' r1':''}" onclick="openSKGPartyDetail('${p.name}')">
       <div class="skg-p-rank${i===0?' r1':''}">${i+1}</div>
       <div class="skg-p-logo">${logoHtml}</div>
       <div class="skg-p-body">
