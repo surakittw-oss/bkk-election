@@ -381,7 +381,6 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.ci{animation:fadeUp .2s ease both}
 .sc{animation:fadeUp .2s ease both}
 .sc:nth-child(1){animation-delay:.03s}
 .sc:nth-child(2){animation-delay:.06s}
@@ -413,6 +412,12 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
   border-right:1px solid var(--line2);flex-shrink:0;
 }
 .ci-av-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+/* รูปวงกลม */
+.ci-av-wrap .ci-av-img{
+  width:62px;height:62px;border-radius:50%;overflow:hidden;
+  border:2px solid var(--line);object-fit:cover;flex-shrink:0;
+}
+.ci.r1 .ci-av-wrap .ci-av-img{border-color:var(--g);box-shadow:0 0 12px rgba(34,211,160,.25)}
 .ci-body{padding:12px 16px;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .ci-name{font-size:16px;font-weight:700;color:var(--t1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
@@ -1054,9 +1059,9 @@ const medals = MEDAL_SVG;
     const bw=d.cands[0].votes?(c.votes/d.cands[0].votes*100):0;
     const isFirst=i===0;
     const avHtml=c.avatar
-      ?`<img src="${c.avatar}" onerror="this.style.display='none';this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',96)">`
-      :svgAv(c.name,c.color,96);
-    return `<div class="ci${isFirst?' r1':''}" onclick="openCandDetail(${i})" style="animation-delay:${i*.04}s;border-left:4px solid ${c.color}">
+      ?`<img class="ci-av-img" src="${c.avatar}" onerror="this.outerHTML=svgAv('${c.name}','${c.color}',62)">`
+      :`<div style="width:62px;height:62px;border-radius:50%;overflow:hidden;flex-shrink:0">${svgAv(c.name,c.color,62)}</div>`;
+    return `<div class="ci${isFirst?' r1':''}" onclick="openCandDetail(${i})" style="border-left:4px solid ${c.color}">
       <div class="ci-no">${c.no||i+1}</div>
       <div class="ci-av-wrap">${avHtml}</div>
       <div class="ci-body">
