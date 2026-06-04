@@ -92,7 +92,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .wc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:5px}
 .wc-lbl::after{content:'';flex:1;height:1px;background:var(--g3);opacity:.3}
 .wc-av{
-  width:94px;height:auto;border-radius:12px;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:12px;display:block;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);}
+  width:94px;height:94px;border-radius:12px;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);object-fit:contain;}
 .wc-name{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;margin-bottom:3px}
 .wc-party{font-size:13px;color:var(--t3);margin-bottom:10px}
 .wc-votes{font-size:20px;font-weight:800;color:var(--g);letter-spacing:-.5px}
@@ -392,7 +392,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .cands-grid{display:flex!important;flex-direction:column;gap:0}
 .ci{
   display:grid!important;
-  grid-template-columns:56px 80px 1fr auto;
+  grid-template-columns:56px 96px 1fr auto;
   align-items:stretch;gap:0;padding:0;
   border-right:none;border-bottom:1px solid var(--line2);
   cursor:pointer;transition:background .12s;
@@ -407,16 +407,15 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 }
 .ci.r1 .ci-no{color:var(--t1);background:var(--bg2)}
 .ci-av-wrap{
-  width:80px;background:var(--bg3);
+  width:96px;overflow:hidden;background:var(--bg4);
   display:flex;align-items:center;justify-content:center;
   border-right:1px solid var(--line2);flex-shrink:0;
-  padding:8px;
 }
-.ci-av-wrap img{width:100%;height:auto;display:block;border-radius:6px}
+.ci-av-wrap img{width:100%;height:100%;object-fit:cover;display:block}
 /* รูปวงกลม */
 .ci-av-wrap .ci-av-img{
-  width:62px;height:auto;border-radius:8px;overflow:hidden;
-  border:2px solid var(--line);display:block;flex-shrink:0;
+  width:62px;height:62px;border-radius:8px;overflow:hidden;
+  border:2px solid var(--line);object-fit:contain;flex-shrink:0;
   background:var(--bg3);
 }
 .ci.r1 .ci-av-wrap .ci-av-img{border-color:var(--g);box-shadow:0 0 12px rgba(34,211,160,.25)}
@@ -442,8 +441,8 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .ci.r1 .ci-votes-big{color:var(--g);font-size:32px}
 .ci-pct-tag{font-size:13px;color:var(--t3)}
 @media(max-width:768px){
-  .ci{grid-template-columns:44px 64px 1fr auto;min-height:auto}
-  .ci-av-wrap{width:64px}
+  .ci{grid-template-columns:44px 72px 1fr auto;min-height:70px}
+  .ci-av-wrap{width:72px}
   .ci-no{font-size:20px}
   .ci-name{font-size:14px}
   .ci.r1 .ci-name{font-size:15px}
@@ -452,8 +451,8 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
   .ci-score-box{padding:10px 14px;min-width:110px}
 }
 @media(max-width:480px){
-  .ci{grid-template-columns:38px 56px 1fr auto;min-height:auto}
-  .ci-av-wrap{width:56px}
+  .ci{grid-template-columns:38px 60px 1fr auto;min-height:60px}
+  .ci-av-wrap{width:60px}
   .ci-no{font-size:17px}
   .ci-score-box{min-width:90px;padding:8px 10px}
   .ci-votes-big{font-size:18px}
@@ -1044,7 +1043,7 @@ function renderDash(d){
   const w=d.cands[0];
   if(w&&w.name){
     const aw=f('w-avatar-wrap');
-    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" style="width:100%;height:auto;display:block;border-radius:12px;background:var(--bg3)" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
+    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0;object-fit:contain;background:var(--bg3);border-radius:12px" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
     else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',94);
     f('w-name').textContent=w.name;
     f('w-party-wrap').innerHTML=(w.no?`<span style="font-size:11px;color:var(--t4);margin-right:6px">เบอร์ ${w.no}</span>`:'')+(w.party||'');
@@ -1066,7 +1065,7 @@ const medals = MEDAL_SVG;
     const isFirst=i===0;
     const avHtml=c.avatar
       ?`<img class="ci-av-img" src="${c.avatar}" onerror="this.outerHTML=svgAv('${c.name}','${c.color}',62)">`
-      :`<div style="width:62px;height:62px;border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">${svgAv(c.name,c.color,62)}</div>`;
+      :`<div style="width:62px;height:62px;border-radius:8px;overflow:hidden;flex-shrink:0">${svgAv(c.name,c.color,62)}</div>`;
     return `<div class="ci${isFirst?' r1':''}" onclick="openCandDetail(${i})" style="border-left:4px solid ${c.color}">
       <div class="ci-no">${c.no||i+1}</div>
       <div class="ci-av-wrap">${avHtml}</div>
