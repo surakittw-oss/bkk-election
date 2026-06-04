@@ -1343,6 +1343,16 @@ function parseCSVLine(line){
   for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){r.push(cur.trim());cur='';}else{cur+=c;}}
   r.push(cur.trim());return r;
 }
+// ── Google Drive URL converter (global) ──────────────────────────
+function gdrive(url){
+  if(!url) return '';
+  const m1=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m1) return 'https://drive.google.com/thumbnail?id='+m1[1]+'&sz=s400';
+  const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m2&&url.includes('drive.google.com')) return 'https://drive.google.com/thumbnail?id='+m2[1]+'&sz=s400';
+  return url;
+}
+
 async function loadFromCSVUrl(csvUrl,lbl){
   clearInterval(simTimer);document.getElementById('live-txt').textContent='โหลด...';
   try{
@@ -1396,17 +1406,7 @@ async function loadFromCSVUrl(csvUrl,lbl){
     });
 
     const clean=(r,i)=>i>=0?(r[i]||'').replace(/^"+|"+$/g,'').replace(/,/g,'').trim():'';
-    // แปลง Google Drive view/share link → thumbnail URL อัตโนมัติ
-    const gdrive=(url)=>{
-      if(!url) return '';
-      // /file/d/FILE_ID/view → thumbnail
-      const m1=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if(m1) return 'https://drive.google.com/thumbnail?id='+m1[1]+'&sz=s400';
-      // /open?id=FILE_ID → thumbnail
-      const m2=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if(m2 && url.includes('drive.google.com')) return 'https://drive.google.com/thumbnail?id='+m2[1]+'&sz=s400';
-      return url;
-    };
+    // gdrive() เป็น global function — ประกาศไว้ด้านบนแล้ว
     const parsed=rows.map((r,i)=>({
       id:i+1,
       originalIndex:i,  // เก็บลำดับจาก Sheet ไว้ map กับ votes_N
@@ -1684,7 +1684,7 @@ async function loadImageSheet(url) {
         hdrIdx = i; break;
       }
     }
-    const hdr = parseCSVLine(lines[hdrIdx]).map(h => h.toLowerCase().replace(/[^a-zก-ฮ_]/g,'').trim());
+    const hdr = parseCSVLine(lines[hdrIdx]).map(h => (h||'').toLowerCase().replace(/^["+]+|["+]+$/g,'').trim());
     const getIdx = (tokens) => hdr.findIndex(h => tokens.some(t => h.includes(t)));
 
     const iNo     = getIdx(['no','ลำดับ']);
@@ -1709,7 +1709,10 @@ async function loadImageSheet(url) {
       };
     });
 
-    console.log('ImageSheet loaded:', Object.keys(imageMap).length, 'entries');
+    console.log('ImageSheet loaded:', Object.keys(imageMap).length, 'entries', imageMap);
+    if(Object.keys(imageMap).length === 0){
+      console.warn('ImageSheet: ไม่พบข้อมูล ตรวจสอบ: 1) URL ถูกต้อง 2) Share เป็น Anyone with link 3) Header มี no และ avatar');
+    }
     return imageMap;
   } catch(e) {
     console.warn('ImageSheet error:', e.message);
@@ -1953,16 +1956,23 @@ async function loadFromECT(){
 }
 
 // Auto-refresh ทุก 60 วินาที
-function startECTPolling(imageSheetUrl){
-  // โหลด image sheet ก่อน (ถ้ามี URL) แล้วค่อย fetch ECT
-  if(imageSheetUrl){
-    loadImageSheet(imageSheetUrl).then(map => {
-      ectImageMap = map;
-      showToast('โหลดรูปภาพสำเร็จ '+Object.keys(map).length+' คน', 'success');
-    });
-  }
-  loadFromECT();
+async function startECTPolling(imageSheetUrl){
   clearInterval(ectTimer);
+  document.getElementById('live-txt').textContent='โหลด...';
+  // โหลด image sheet ก่อน แล้วค่อย fetch ECT
+  if(imageSheetUrl && imageSheetUrl.trim()){
+    showToast('กำลังโหลด Sheet รูปภาพ...', 'saving');
+    try{
+      ectImageMap = await loadImageSheet(imageSheetUrl.trim());
+      showToast('โหลดรูปภาพสำเร็จ '+Object.keys(ectImageMap).length+' คน', 'success');
+    }catch(e){
+      console.warn('ImageSheet load failed:', e);
+      ectImageMap = null;
+    }
+  } else {
+    ectImageMap = null;
+  }
+  await loadFromECT();
   ectTimer = setInterval(loadFromECT, 60000);
   document.getElementById('live-txt').textContent='ECT Live';
 }
