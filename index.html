@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BKK Election 2026 — ผลการเลือกตั้งผู้ว่า กทม</title>
+<title>BKKVote 2568 — ผลการเลือกตั้งผู้ว่า กทม</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -641,10 +641,14 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
               <div style="font-size:10px;color:var(--t4);margin-bottom:4px">ECT Election API (media.election.in.th)</div>
               <div style="display:flex;gap:5px;margin-bottom:5px">
                 <input class="inp" id="ect-key" placeholder="Partner API Key (ถ้ามี)" style="flex:1;font-size:11px">
-                <button class="btn-p" onclick="ECT_KEY=document.getElementById('ect-key').value.trim();startECTPolling()">▶ Live</button>
+                <button class="btn-p" onclick="ECT_KEY=document.getElementById('ect-key').value.trim();startECTPolling(document.getElementById('ect-img-url').value.trim())">▶ Live</button>
                 <button class="btn-s" onclick="stopECTPolling()">■ หยุด</button>
               </div>
-              <div style="font-size:10px;color:var(--t4)">Auto-refresh ทุก 60 วินาที · GOVERNOR_ID + COUNCIL_ID ตั้งค่าใน code แล้ว</div>
+              <div style="margin-top:5px">
+                <input class="inp" id="ect-img-url" placeholder="URL Sheet รูปภาพ (ว่างได้)" style="font-size:11px">
+                <div style="font-size:10px;color:var(--t4);margin-top:3px">Sheet format: no | avatar | color | partyLogo — ใช้ no ตรงกับเบอร์ผู้สมัครใน ECT</div>
+              </div>
+              <div style="font-size:10px;color:var(--t4);margin-top:4px">Auto-refresh ทุก 60 วินาที · GOVERNOR_ID + COUNCIL_ID ตั้งค่าใน code แล้ว</div>
             </div>
             <div style="border-top:1px solid var(--line2);padding-top:6px;margin-top:2px">
               <div style="font-size:10px;color:var(--t4);margin-bottom:4px">หรือโหลด JSON จาก URL ตรง</div>
@@ -1655,6 +1659,78 @@ const firebaseConfig={
   appId:"1:1020264986175:web:3ee5c3cd1d93f16c882a8a",
 };
 let fbApp=null,fbDb=null,fbConnected=false,fbListener=null;
+
+// ════ IMAGE OVERRIDE SHEET ══════════════════════════════════════════
+// โหลดรูปภาพจาก Sheet ของเราเอง แล้ว merge กับข้อมูลจาก ECT API
+// Sheet format: no | name | avatar | color | partyLogo
+// no ตรงกับ candidateNumber จาก ECT API
+
+async function loadImageSheet(url) {
+  try {
+    const res = await fetch(sheetURLtoCSV(url));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    if (lines.length < 2) return {};
+
+    // หา header row
+    let hdrIdx = 0;
+    for (let i = 0; i < Math.min(lines.length, 6); i++) {
+      const cols = parseCSVLine(lines[i]).map(c => c.toLowerCase().trim());
+      if (cols.some(c => c === 'no' || c === 'ลำดับ') &&
+          cols.some(c => c.includes('avatar') || c.includes('รูป'))) {
+        hdrIdx = i; break;
+      }
+    }
+    const hdr = parseCSVLine(lines[hdrIdx]).map(h => h.toLowerCase().replace(/[^a-zก-ฮ_]/g,'').trim());
+    const getIdx = (tokens) => hdr.findIndex(h => tokens.some(t => h.includes(t)));
+
+    const iNo     = getIdx(['no','ลำดับ']);
+    const iAvt    = getIdx(['avatar','รูป']);
+    const iColor  = getIdx(['color','สี']);
+    const iLogo   = getIdx(['logo','partylogo','โลโก']);
+    const iName   = getIdx(['name','ชื่อ']);
+
+    const clean = (r, i) => i >= 0 ? (r[i]||'').replace(/^"+|"+$/g,'').trim() : '';
+
+    const imageMap = {};
+    // ข้าม description row (hdrIdx+2)
+    lines.slice(hdrIdx + 2).map(parseCSVLine).forEach(r => {
+      const noVal = parseInt(clean(r, iNo));
+      if (!noVal) return;
+      imageMap[noVal] = {
+        no:        noVal,
+        name:      clean(r, iName),
+        avatar:    gdrive(clean(r, iAvt)),
+        color:     clean(r, iColor) || '',
+        partyLogo: gdrive(clean(r, iLogo)),
+      };
+    });
+
+    console.log('ImageSheet loaded:', Object.keys(imageMap).length, 'entries');
+    return imageMap;
+  } catch(e) {
+    console.warn('ImageSheet error:', e.message);
+    return {};
+  }
+}
+
+// merge ECT/Firebase candidates กับ image overrides
+function mergeImageData(candidatesArr, imageMap) {
+  if (!imageMap || !Object.keys(imageMap).length) return candidatesArr;
+  return candidatesArr.map(c => {
+    const override = imageMap[c.no] || imageMap[c.id] || null;
+    if (!override) return c;
+    return {
+      ...c,
+      avatar:    override.avatar    || c.avatar    || '',
+      color:     override.color     || c.color     || PRESET[(c.no||c.id||0) % PRESET.length],
+      partyLogo: override.partyLogo || c.partyLogo || '',
+    };
+  });
+}
+// ════════════════════════════════════════════════════════════════════
+
 function initFirebase(){
   try{
     fbApp=firebase.initializeApp(firebaseConfig);
@@ -1766,6 +1842,7 @@ const ECT_BASE        = 'https://media.election.in.th';
 const ECT_GOVERNOR_ID = '095f76e8-bed8-42e3-859a-2b47540ba8bd';
 const ECT_COUNCIL_ID  = 'be5498a6-9d05-4655-8f1d-ba0f9dcb07a4';
 let   ectTimer        = null;
+let   ectImageMap     = null;  // image overrides จาก Sheet ของเรา
 
 // helper fetch
 function ectGet(path){
@@ -1786,7 +1863,7 @@ async function loadFromECT(){
     ]);
 
     // ── candidates ─────────────────────────────────────────────────
-    cands = govCands.candidates
+    const rawCands = govCands.candidates
       .sort((a,b)=>b.totalVotes-a.totalVotes)
       .map((c,i)=>({
         id: c.candidateId||i+1,
@@ -1799,6 +1876,8 @@ async function loadFromECT(){
         avatar: c.imageUrl||c.image||'',
         partyLogo: c.party?.imageUrl||'',
       }));
+    // merge กับ image overrides ถ้ามี
+    cands = ectImageMap ? mergeImageData(rawCands, ectImageMap) : rawCands;
 
     // ── districtData จาก electionAreas ────────────────────────────
     // map areaNumber → district name ด้วย BKK_DISTRICTS
@@ -1859,7 +1938,14 @@ async function loadFromECT(){
 }
 
 // Auto-refresh ทุก 60 วินาที
-function startECTPolling(){
+function startECTPolling(imageSheetUrl){
+  // โหลด image sheet ก่อน (ถ้ามี URL) แล้วค่อย fetch ECT
+  if(imageSheetUrl){
+    loadImageSheet(imageSheetUrl).then(map => {
+      ectImageMap = map;
+      showToast('โหลดรูปภาพสำเร็จ '+Object.keys(map).length+' คน', 'success');
+    });
+  }
   loadFromECT();
   clearInterval(ectTimer);
   ectTimer = setInterval(loadFromECT, 60000);
