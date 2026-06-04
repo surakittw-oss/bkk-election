@@ -92,7 +92,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .wc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:5px}
 .wc-lbl::after{content:'';flex:1;height:1px;background:var(--g3);opacity:.3}
 .wc-av{
-  width:70px;height:auto;border-radius:10px;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:8px;display:block;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);}
+  width:80px;height:80px;border-radius:10px;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);flex-shrink:0;}
 .wc-name{font-size:14px;font-weight:800;color:var(--t1);letter-spacing:-.3px;line-height:1.2;margin-bottom:3px}
 .wc-party{font-size:11px;color:var(--t3);margin-bottom:8px}
 .wc-votes{font-size:16px;font-weight:800;color:var(--g);letter-spacing:-.5px}
@@ -1044,7 +1044,7 @@ function renderDash(d){
   const w=d.cands[0];
   if(w&&w.name){
     const aw=f('w-avatar-wrap');
-    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" style="width:100%;height:auto;display:block;border-radius:12px;background:var(--bg3)" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
+    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;display:block" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',80)">`;
     else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',94);
     f('w-name').textContent=w.name;
     f('w-party-wrap').innerHTML=(w.no?`<span style="font-size:11px;color:var(--t4);margin-right:6px">เบอร์ ${w.no}</span>`:'')+(w.party||'');
