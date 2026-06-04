@@ -92,7 +92,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .wc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:5px}
 .wc-lbl::after{content:'';flex:1;height:1px;background:var(--g3);opacity:.3}
 .wc-av{
-  width:94px;height:94px;border-radius:50%;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);object-fit:contain;}
+  width:94px;height:94px;border-radius:12px;border:2px solid var(--g3);overflow:hidden;background:var(--bg3);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 0 20px rgba(34,211,160,.15);object-fit:contain;}
 .wc-name{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2;margin-bottom:3px}
 .wc-party{font-size:13px;color:var(--t3);margin-bottom:10px}
 .wc-votes{font-size:20px;font-weight:800;color:var(--g);letter-spacing:-.5px}
@@ -263,7 +263,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .cand-modal .modal-box{max-width:500px}
 .cd-hero{background:var(--bg3);border-radius:var(--r);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
 .cd-hero-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
-.cd-av{width:88px;height:88px;border-radius:50%;overflow:hidden;border:2px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
+.cd-av{width:88px;height:88px;border-radius:12px;overflow:hidden;border:2px solid var(--line);background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0}
 .cd-rank{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;margin-bottom:6px}
 .cd-name{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.4px;line-height:1.2}
 .cd-party{font-size:11px;color:var(--t3);margin-top:3px}
@@ -414,7 +414,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:11px}
 .ci-av-wrap img{width:100%;height:100%;object-fit:cover;display:block}
 /* รูปวงกลม */
 .ci-av-wrap .ci-av-img{
-  width:62px;height:62px;border-radius:50%;overflow:hidden;
+  width:62px;height:62px;border-radius:8px;overflow:hidden;
   border:2px solid var(--line);object-fit:contain;flex-shrink:0;
   background:var(--bg3);
 }
@@ -1043,7 +1043,7 @@ function renderDash(d){
   const w=d.cands[0];
   if(w&&w.name){
     const aw=f('w-avatar-wrap');
-    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0;object-fit:contain;background:var(--bg3)" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
+    if(w.avatar) aw.innerHTML=`<img src="${w.avatar}" class="wc-av" style="font-size:0;object-fit:contain;background:var(--bg3);border-radius:12px" onerror="this.parentNode.innerHTML=svgAvHtml('${w.name}','${w.color}','wc-av',94)">`;
     else aw.innerHTML=svgAvHtml(w.name,w.color,'wc-av',94);
     f('w-name').textContent=w.name;
     f('w-party-wrap').innerHTML=(w.no?`<span style="font-size:11px;color:var(--t4);margin-right:6px">เบอร์ ${w.no}</span>`:'')+(w.party||'');
@@ -1065,7 +1065,7 @@ const medals = MEDAL_SVG;
     const isFirst=i===0;
     const avHtml=c.avatar
       ?`<img class="ci-av-img" src="${c.avatar}" onerror="this.outerHTML=svgAv('${c.name}','${c.color}',62)">`
-      :`<div style="width:62px;height:62px;border-radius:50%;overflow:hidden;flex-shrink:0">${svgAv(c.name,c.color,62)}</div>`;
+      :`<div style="width:62px;height:62px;border-radius:8px;overflow:hidden;flex-shrink:0">${svgAv(c.name,c.color,62)}</div>`;
     return `<div class="ci${isFirst?' r1':''}" onclick="openCandDetail(${i})" style="border-left:4px solid ${c.color}">
       <div class="ci-no">${c.no||i+1}</div>
       <div class="ci-av-wrap">${avHtml}</div>
@@ -1623,7 +1623,7 @@ function openCandDetail(idx){
   const rankLabel=rankLabels[idx+1]||`อันดับ ${idx+1}`;
   document.getElementById('cd-hero-bar').style.background=c.color;
   const avEl=document.getElementById('cd-av');
-  if(c.avatar){avEl.innerHTML=`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:contain;border-radius:50%;background:var(--bg3)" onerror="this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',72)">`;}
+  if(c.avatar){avEl.innerHTML=`<img src="${c.avatar}" style="width:100%;height:100%;object-fit:contain;border-radius:12px;background:var(--bg3)" onerror="this.parentNode.innerHTML=svgAv('${c.name}','${c.color}',72)">`;}
   else{avEl.innerHTML=svgAv(c.name,c.color,72);}
   avEl.style.borderColor=c.color+'55';
   const rankEl=document.getElementById('cd-rank');rankEl.innerHTML=rankLabel;rankEl.style.background=c.color+'18';rankEl.style.color=c.color;
