@@ -1864,15 +1864,20 @@ async function loadFromECT(){
     ]);
 
     // ── candidates ─────────────────────────────────────────────────
-    const rawCands = govCands.candidates
-      .sort((a,b)=>b.totalVotes-a.totalVotes)
+    // defensive: รองรับ response หลายรูปแบบ
+    const candList = govCands?.candidates || govCands?.data?.candidates
+                  || govCands?.result?.candidates || govCands?.items
+                  || (Array.isArray(govCands) ? govCands : []);
+    if(!candList.length) throw new Error('ไม่พบข้อมูลผู้สมัครใน API response — ลอง console.log(govCands) ดู structure');
+    const rawCands = candList
+      .sort((a,b)=>(b.totalVotes||b.votes||0)-(a.totalVotes||a.votes||0))
       .map((c,i)=>({
         id: c.candidateId||i+1,
         no: c.candidateNumber||i+1,
         originalIndex: i,
         name: c.name||'ผู้สมัคร '+(i+1),
         party: c.party?.name||'อิสระ',
-        votes: c.totalVotes||0,
+        votes: c.totalVotes||c.votes||0,
         color: c.party?.color||PRESET[i%PRESET.length],
         avatar: c.imageUrl||c.image||'',
         partyLogo: c.party?.imageUrl||'',
@@ -1882,7 +1887,9 @@ async function loadFromECT(){
 
     // ── districtData จาก electionAreas ────────────────────────────
     // map areaNumber → district name ด้วย BKK_DISTRICTS
-    districtData = govAreas.electionAreas.map(a=>{
+    const areaList = govAreas?.electionAreas || govAreas?.data?.electionAreas
+                || govAreas?.areas || (Array.isArray(govAreas) ? govAreas : []);
+    districtData = areaList.map(a=>{
       const distName = a.name || BKK_DISTRICTS[a.areaNumber-1] || 'เขต '+a.areaNumber;
       // สร้าง votes_N จาก candidates ของเขตนี้
       const row = {district: distName, counted: a.coverage?.percentage > 0};
@@ -1897,8 +1904,10 @@ async function loadFromECT(){
 
     // ── skgData จาก council candidates ────────────────────────────
     skgData = {};
-    if(councilAreas?.candidates){
-      councilAreas.candidates.forEach(c=>{
+    const councilList = councilAreas?.candidates || councilAreas?.data?.candidates
+                    || councilAreas?.items || (Array.isArray(councilAreas) ? councilAreas : []);
+    if(councilList.length){
+      councilList.forEach(c=>{
         const dist = c.areaName||'เขต '+c.areaNumber;
         if(!skgData[dist]) skgData[dist]=[];
         skgData[dist].push({
@@ -1915,9 +1924,10 @@ async function loadFromECT(){
     }
 
     // ── stat cards ─────────────────────────────────────────────────
-    const pct  = govStat.coverage?.percentage||0;
-    const rep  = govStat.coverage?.stationsReported||0;
-    const tot  = govStat.coverage?.totalStations||0;
+    const statData = govStat?.coverage || govStat?.data?.coverage || govStat || {};
+    const pct  = statData.percentage||0;
+    const rep  = statData.stationsReported||0;
+    const tot  = statData.totalStations||0;
     document.getElementById('s-counted').textContent = rep;
     document.getElementById('s-total').textContent   = 'จาก '+tot+' หน่วย';
     document.getElementById('prog').style.width      = pct+'%';
@@ -1934,7 +1944,10 @@ async function loadFromECT(){
   }catch(e){
     showToast('ECT API error: '+e.message,'error');
     document.getElementById('live-txt').textContent='Error';
-    console.error('ECT API:',e);
+    console.error('ECT API error:', e);
+    console.log('Debug — กรุณา copy ข้อความนี้แจ้งทีม:');
+    console.log('govCands keys:', govCands ? Object.keys(govCands) : 'undefined');
+    console.log('govAreas keys:', govAreas ? Object.keys(govAreas) : 'undefined');
   }
 }
 
