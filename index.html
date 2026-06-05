@@ -1868,10 +1868,10 @@ async function loadFromECT(){
   document.getElementById('foot-src').textContent='ECT API';
   try{
     const [govStat, govCands, govAreas, councilAreas] = await Promise.all([
-      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/statistics`),
-      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/candidates`),
-      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/electionAreas`),
-      ectGet(`/api/media/elections/${ECT_COUNCIL_ID}/auto/candidates`),
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/statistics?level=province`),
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/candidates?level=province`),
+      ectGet(`/api/media/elections/${ECT_GOVERNOR_ID}/auto/electionAreas?level=province`),
+      ectGet(`/api/media/elections/${ECT_COUNCIL_ID}/auto/candidates?level=area`),
     ]);
 
     // ── candidates ─────────────────────────────────────────────────
