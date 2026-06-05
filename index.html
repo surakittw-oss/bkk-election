@@ -1734,6 +1734,7 @@ function mergeImageData(candidatesArr, imageMap) {
     if (!override) return c;
     return {
       ...c,
+      name:      override.name      || c.name,
       avatar:    override.avatar    || c.avatar    || '',
       color:     override.color     || c.color     || PRESET[(c.no||c.id||0) % PRESET.length],
       partyLogo: override.partyLogo || c.partyLogo || '',
