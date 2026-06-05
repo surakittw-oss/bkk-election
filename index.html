@@ -2017,9 +2017,18 @@ initFirebase();
   const style = document.createElement('style');
   style.textContent = `
     .topbar{display:none!important}
-    body{background:transparent!important}
+    body{background:transparent!important;overflow-x:hidden!important}
     .dashboard{padding:0!important;margin:0!important}
-    .detail-overlay{display:none!important}
+    /* ซ่อนทุก fixed/modal element ใน embed mode */
+    .detail-overlay,
+    .cms-modal,
+    .modal-bg,
+    #cpop,
+    #cand-detail-modal,
+    #img-modal,
+    #logo-modal,
+    .drawer,
+    .toast{display:none!important;visibility:hidden!important}
     /* section map */
     .section-map .middle-row{grid-template-columns:1fr!important;margin:0}
     .section-map .right-col{display:none!important}
